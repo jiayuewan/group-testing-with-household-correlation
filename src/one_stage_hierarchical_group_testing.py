@@ -43,6 +43,9 @@ def simulation_fixed_household_size(population_size, household_size, pool_size, 
 def plot_hist(fnr_indep, fnr_correlated):
     plt.hist([fnr_indep, fnr_correlated], label=['independent infections', 'correlated infections'], alpha=0.5)
     plt.legend(loc='upper right')
+    plt.xlabel('False negative rate')
+    plt.ylabel('Incidence')
+    plt.title('Distribution of FNR values for random and correlated group testing \n (prevalence 0.1)')
     plt.show()
     return
 
@@ -51,3 +54,4 @@ if __name__ == '__main__':
     fnr_indep, fnr_correlated = simulation_fixed_household_size(3000, 3, 30, 0.1, 1000)
     print(np.mean(fnr_indep), np.mean(fnr_correlated))
     plot_hist(fnr_indep, fnr_correlated)
+
