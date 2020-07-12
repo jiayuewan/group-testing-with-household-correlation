@@ -45,13 +45,13 @@ def plot_hist(fnr_indep, fnr_correlated):
     plt.legend(loc='upper right')
     plt.xlabel('False negative rate')
     plt.ylabel('Incidence')
-    plt.title('Distribution of FNR values for random and correlated group testing \n (prevalence 0.1)')
+    plt.title('Distribution of FNR values for random and correlated group testing \n (prevalence 0.01)')
     plt.show()
     return
 
 
 if __name__ == '__main__':
-    fnr_indep, fnr_correlated = simulation_fixed_household_size(3000, 3, 30, 0.1, 1000)
+    fnr_indep, fnr_correlated = simulation_fixed_household_size(3000, 3, 30, 0.01, 1000)
     print(np.mean(fnr_indep), np.mean(fnr_correlated))
     plot_hist(fnr_indep, fnr_correlated)
 
