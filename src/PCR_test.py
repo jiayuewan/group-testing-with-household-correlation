@@ -23,12 +23,22 @@ def one_PCR_test(mu, params=base_params):
 
     return (N_template>=LoD)
 
+def eval_FNR(mu, params = base_params, n_iter = 1000):
+    """Input: viral load concentration, parameters
+    Output: expected false negative rate"""
+
+    detected = 0
+    for j in range(n_iter):
+        detected += one_PCR_test(mu, params)
+
+    return 1-detected/n_iter
+
+
+
 if __name__ == '__main__':
     n_iter = 100
     mu_list = 10 ** np.linspace(-2, 4, 61)
-    fraction_detected = np.zeros(len(mu_list))
+    FNRs = np.zeros(len(mu_list))
     for i in range(len(mu_list)):
-        for j in range(n_iter):
-            fraction_detected[i] += one_PCR_test(mu_list[i])
-        fraction_detected[i] = fraction_detected[i] / n_iter
-    print(fraction_detected)
+        FNRs[i] = eval_FNR(mu_list[i])
+    print(FNRs)
