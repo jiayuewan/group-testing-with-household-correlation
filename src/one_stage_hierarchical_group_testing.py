@@ -48,7 +48,8 @@ def plot_hist(fnr_indep, fnr_correlated, prevalence):
     plt.xlabel('False negative rate')
     plt.ylabel('Incidence')
     plt.title('Distribution of FNR values for random and correlated group testing \n (prevalence {})'.format(prevalence))
-    #plt.save('../figs/')
+    plt.show()
+    #plt.savefig('../figs/')
     return
 
 

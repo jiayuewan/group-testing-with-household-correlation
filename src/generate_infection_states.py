@@ -14,7 +14,7 @@ def generate_correlated_infections_fixed_household_size(population_size, househo
     household_dist = [0] * 7
     household_dist[household_size - 1] = 1
     p_index = eval_p_index(match_prevalence, prevalence, household_dist, SAR)
-    print('p_index = {}'.format(p_index))
+    #print('p_index = {}'.format(p_index))
     num_households = population_size // household_size
     infections = st.bernoulli.rvs(p_index, size=(num_households, household_size))
     infected_households = np.sum(infections, axis=1)
