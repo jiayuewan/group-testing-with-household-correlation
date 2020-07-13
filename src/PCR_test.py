@@ -3,7 +3,7 @@ import numpy as np
 base_params = {'V_sample': 1000, 'c_1': 1/20, 'gamma': 1/2, 'c_2': 1, 'LoD':5}
 
 def one_PCR_test(mu, params=base_params):
-    """Input: mu = viral load concentration; params = PCR test parameters for subsampling and dilution
+    """Input: mu = viral load concentration (copies/mL); params = PCR test parameters for subsampling and dilution
     Output: 1 for test positive; 0 for test negative"""
 
     V_sample = params['V_sample']
