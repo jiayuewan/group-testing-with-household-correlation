@@ -1,6 +1,6 @@
 import numpy as np
 
-base_params = {'V_sample': 1000, 'c_1': 1/20, 'gamma': 1/2, 'c_2': 1}
+base_params = {'V_sample': 1000, 'c_1': 1/20, 'gamma': 1/2, 'c_2': 1, 'LoD':5}
 
 def one_PCR_test(mu, params=base_params):
     """Input: mu = viral load concentration; params = PCR test parameters for subsampling and dilution
@@ -10,6 +10,7 @@ def one_PCR_test(mu, params=base_params):
     c_1 = params['c_1']
     gamma = params['gamma']
     c_2 = params['c_2']
+    LoD = params['LoD']
 
     # copies of RNA in a subsample that is c_1 the original volume
     N_subsample = np.random.binomial(V_sample * mu, c_1)
@@ -20,7 +21,7 @@ def one_PCR_test(mu, params=base_params):
     # copies of RNA in PCR template that is c_2 of the previous step's eluted quantity
     N_template = np.random.binomial(N_extracted, c_2)
 
-    return (N_template>=5)
+    return (N_template>=LoD)
 
 if __name__ == '__main__':
     n_iter = 100
