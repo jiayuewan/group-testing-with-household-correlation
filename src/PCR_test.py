@@ -23,7 +23,8 @@ def one_PCR_test(mu, params=base_params):
 
     return (N_template>=LoD)
 
-def eval_FNR(mu, params = base_params, n_iter = 1000):
+
+def eval_FNR(mu, params=base_params, n_iter=1000):
     """Input: viral load concentration, parameters
     Output: expected false negative rate"""
 
@@ -31,8 +32,7 @@ def eval_FNR(mu, params = base_params, n_iter = 1000):
     for j in range(n_iter):
         detected += one_PCR_test(mu, params)
 
-    return 1-detected/n_iter
-
+    return 1 - detected / n_iter
 
 
 if __name__ == '__main__':

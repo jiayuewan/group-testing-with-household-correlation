@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.stats as st
 from eval_p_index import match_prevalence, eval_p_index
+import matplotlib.pyplot as plt
 
 
 def generate_independent_infections(population_size, prevalence):
@@ -14,7 +15,6 @@ def generate_correlated_infections_fixed_household_size(population_size, househo
     household_dist = [0] * 7
     household_dist[household_size - 1] = 1
     p_index = eval_p_index(match_prevalence, prevalence, household_dist, SAR)
-    #print('p_index = {}'.format(p_index))
     num_households = population_size // household_size
     infections = st.bernoulli.rvs(p_index, size=(num_households, household_size))
     infected_households = np.sum(infections, axis=1)
@@ -32,3 +32,15 @@ if __name__ == '__main__':
     for prevalence in prevalences:
         infections = generate_correlated_infections_fixed_household_size(population_size, household_size, prevalence)
         print('expected prevlance = {}, simulated prevalence = {}'.format(prevalence, np.sum(infections) / population_size))
+
+
+    independent_infections = np.zeros(1000)
+    correlated_infections = np.zeros(1000)
+    for i in range(1000):
+        independent_infections[i] = np.sum(generate_independent_infections(3000, 0.01))
+        correlated_infections[i] = np.sum(generate_correlated_infections_fixed_household_size(3000, 3, 0.01))
+
+    print(np.mean(independent_infections), np.std(independent_infections), np.mean(correlated_infections), np.std(correlated_infections))
+    plt.hist([independent_infections, correlated_infections], label=['independent', 'correlated'], alpha=0.5)
+    plt.legend(loc='upper right')
+    plt.show()

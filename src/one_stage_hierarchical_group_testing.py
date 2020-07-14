@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.stats as st
 import random
-from generate_infection_states import generate_independent_infections, generate_correlated_infections_fixed_household_size
+from generate_infection_states import generate_correlated_infections_fixed_household_size, generate_independent_infections
 import matplotlib.pyplot as plt
 
 
@@ -11,11 +11,15 @@ def false_negative_rate(num_positives, type='exp'):
         return 0.1 ** num_positives
 
 
-def one_stage_group_testing_fixed_household_size(infections, pool_size):
+def one_stage_group_testing_fixed_household_size(infections, pool_size, shuffle=False):
     population_size = infections.size
     assert population_size % pool_size == 0
 
     num_pools = population_size // pool_size
+
+    if shuffle:
+        pools = infections.flatten()
+        np.random.shuffle(pools)
 
     pools = infections.reshape((num_pools, -1))
     num_positives_in_pools = np.sum(pools, axis=1)
@@ -27,34 +31,39 @@ def one_stage_group_testing_fixed_household_size(infections, pool_size):
 
 
 def simulation_fixed_household_size(population_size, household_size, pool_size, prevalence, num_iters=100):
-    fnr_group_testing_indep_infections = np.zeros(num_iters)
-    fnr_group_testing_correlated_infections = np.zeros(num_iters)
+    fnr_group_testing_with_correlation = np.zeros(num_iters)
+    fnr_group_testing_without_correlation = np.zeros(num_iters)
 
     print('running simulation for fixed household size with {} iterations...'.format(num_iters))
+    sum1 = 0
+    sum2 = 0
     for i in range(num_iters):
-        indep_infections = generate_independent_infections(population_size, prevalence)
-        fnr_group_testing_indep_infections[i] = one_stage_group_testing_fixed_household_size(indep_infections, pool_size)
-
-        correlated_infections = generate_correlated_infections_fixed_household_size(population_size, household_size, prevalence)
-        fnr_group_testing_correlated_infections[i] = one_stage_group_testing_fixed_household_size(correlated_infections, pool_size)
-
-
-    return fnr_group_testing_indep_infections, fnr_group_testing_correlated_infections
+        infections1 = generate_correlated_infections_fixed_household_size(population_size, household_size, prevalence)
+        infections2 = generate_independent_infections(population_size, prevalence)
+        sum1 += np.sum(infections1)
+        sum2 += np.sum(infections2)
+        fnr_group_testing_without_correlation[i] = one_stage_group_testing_fixed_household_size(infections1, pool_size, shuffle=True)
+        fnr_group_testing_with_correlation[i] = one_stage_group_testing_fixed_household_size(infections1, pool_size, shuffle=False)
+    print(sum1,sum2)
+    return fnr_group_testing_without_correlation, fnr_group_testing_with_correlation
 
 
 def plot_hist(fnr_indep, fnr_correlated, prevalence):
-    plt.hist([fnr_indep, fnr_correlated], label=['independent infections', 'correlated infections'], alpha=0.5)
+    assert len(fnr_indep) == len(fnr_correlated)
+    num_iters = len(fnr_indep)
+    plt.hist([fnr_indep, fnr_correlated], label=['independent group testing', 'correlated group testing'], alpha=0.5)
     plt.legend(loc='upper right')
     plt.xlabel('False negative rate')
-    plt.ylabel('Incidence')
-    plt.title('Distribution of FNR values for random and correlated group testing \n (prevalence {})'.format(prevalence))
-    plt.show()
-    #plt.savefig('../figs/')
+    plt.ylabel('Frequency')
+    plt.title('Histogram of FNR values for one-stage group testing \n with fixed household size under prevalence = {}'.format(prevalence))
+    plt.savefig('../figs/fixed_household_prev_{}.pdf'.format(prevalence))
+    plt.close()
     return
 
 
 if __name__ == '__main__':
-    prevalence = 0.01
-    fnr_indep, fnr_correlated = simulation_fixed_household_size(3000, 3, 30, prevalence, 1000)
-    print(np.mean(fnr_indep), np.mean(fnr_correlated))
-    plot_hist(fnr_indep, fnr_correlated, prevalence)
+#    for prevalence in [0.005, 0.01, 0.05, 0.1, 0.2]:
+    for prevalence in [0.01, 0.1]:
+        fnr_indep, fnr_correlated = simulation_fixed_household_size(3000, 3, 30, prevalence, 10000)
+        print('independent fnr = {}, correlated fnr = {}'.format(np.median(fnr_indep), np.median(fnr_correlated)))
+        plot_hist(fnr_indep, fnr_correlated, prevalence)
