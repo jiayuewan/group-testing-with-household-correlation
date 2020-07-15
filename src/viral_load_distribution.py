@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.stats as st
 import scipy.optimize as opt
+import matplotlib.pyplot as plt
 
 mix_gauss_params = [[0.33, 20.13, 3.6], [0.54, 29.41, 3.02], [0.13, 34.81, 1.31]]
 
@@ -42,7 +43,19 @@ def sample_log10_VL(sample_size, params=mix_gauss_params):
 
     return VLs
 
+def plot_log10_VL_pdf(params=mix_gauss_params):
+    cs = np.linspace(-5, 15, 1000)
+    plt.plot(cs, log10_viral_load_pdf(cs, params))
+    plt.title('Distribution of log10 viral load')
+    plt.xlabel('log10 viral load')
+    plt.ylabel('Probability density')
+    plt.show()
+    return
+
 
 #print([log10_viral_load_pdf(i) for i in range(20)])
 #print([log10_viral_load_cdf(i) for i in range(20)])
-print(sample_log10_VL(10))
+#print(sample_log10_VL(10))
+
+if __name__ == '__main__':
+    plot_log10_VL_pdf()
