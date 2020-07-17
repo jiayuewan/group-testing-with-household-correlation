@@ -33,14 +33,14 @@ if __name__ == '__main__':
         infections = generate_correlated_infections_fixed_household_size(population_size, household_size, prevalence)
         print('expected prevlance = {}, simulated prevalence = {}'.format(prevalence, np.sum(infections) / population_size))
 
-
     independent_infections = np.zeros(1000)
     correlated_infections = np.zeros(1000)
     for i in range(1000):
         independent_infections[i] = np.sum(generate_independent_infections(3000, 0.01))
         correlated_infections[i] = np.sum(generate_correlated_infections_fixed_household_size(3000, 3, 0.01))
 
-    print(np.mean(independent_infections), np.std(independent_infections), np.mean(correlated_infections), np.std(correlated_infections))
+    print('independent infections: ', np.mean(independent_infections), np.std(independent_infections))
+    print('correlated infections: ', np.mean(correlated_infections), np.std(correlated_infections))
     plt.hist([independent_infections, correlated_infections], label=['independent', 'correlated'], alpha=0.5)
     plt.legend(loc='upper right')
     plt.show()
