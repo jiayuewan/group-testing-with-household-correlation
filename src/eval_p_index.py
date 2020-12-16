@@ -3,7 +3,29 @@ import numpy as np
 
 US_DIST = [0.2837, 0.3451, 0.1507, 0.1276, 0.0578, 0.0226, 0.0125]
 
-# copied from Massey
+def compute_household_infection_probability(prevalence, household_dist=US_DIST, SAR=0.3741):
+    """
+    computes the probability that a household is infected given population level prevalence,
+    household size distribution and household secondary attack rate
+
+    INPUT:
+    prevalence = population level prevalence
+    household_dist = array-like, probability distribution of household sizes 1, 2, 3, ...
+    SAR = household secondary attack rate
+    """
+    assert(np.absolute(np.sum(household_dist) - 1) < 1e-6)
+
+    exp_household_size = 0
+    exp_household_infection_multiplier = 0
+    for i in range(len(household_dist)):
+        exp_household_size += (i + 1) * household_dist[i]
+        exp_household_infection_multiplier += (1 + (i + 1 - 1) * SAR) * household_dist[i]
+
+    p = prevalence * exp_household_size / exp_household_infection_multiplier
+    return p
+
+
+# modified from Massey's groupt testing code, not used in the most up-to-date version of the simulation
 def match_prevalence(p_index, target_prevalence, household_dist, SAR):
     # computes probability of a primary case given population level prevalence, household size distribution,
     # and household secondary attack rate
@@ -28,10 +50,14 @@ def match_prevalence(p_index, target_prevalence, household_dist, SAR):
     return frac_tot_infected - target_prevalence
 
 
+# modified from Massey's groupt testing code, not used in the most up-to-date version of the simulation
 def eval_p_index(match_prevalence, target_prevalence, household_dist=US_DIST, SAR=0.3741):
     return fsolve(match_prevalence, 0.005, args=(target_prevalence, household_dist, SAR))
 
 
 if __name__ == '__main__':
-    print("find p_index for US household distribution, target prevalence = 0.005: " + str(eval_p_index(match_prevalence, 0.005)))
-    print("find p_index for US household distribution, target prevalence = 0.01: " + str(eval_p_index(match_prevalence, 0.01)))
+    print("household infection probability (US population): " + str(compute_household_infection_probability(0.01)))
+    print("household infection probability (household size = 3): " + str(compute_household_infection_probability(0.01, household_dist=[0,0,1,0,0,0,0])))
+
+    # print("find p_index for US household distribution, target prevalence = 0.005: " + str(eval_p_index(match_prevalence, 0.005)))
+    # print("find p_index for US household distribution, target prevalence = 0.01: " + str(eval_p_index(match_prevalence, 0.01)))
