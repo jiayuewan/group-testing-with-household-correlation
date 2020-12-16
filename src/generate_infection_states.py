@@ -24,6 +24,8 @@ def generate_correlated_infections_fixed_household_size(population_size, househo
                 infections[i, j] = st.bernoulli.rvs(SAR)
     return infections
 
+# def generate_correlated_infections(population_size, prevalence, household_dist=US_DIST, SAR=0.3741):
+
 
 if __name__ == '__main__':
     population_size = 30000

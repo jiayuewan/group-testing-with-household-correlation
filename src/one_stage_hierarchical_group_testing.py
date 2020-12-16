@@ -7,9 +7,16 @@ import matplotlib.pyplot as plt
 
 def false_negative_rate(num_positives, type='exp'):
     assert num_positives >= 1
-    if type == 'exp':
-        return 0.1 ** num_positives
+    # if type == 'exp':
+    #     return 0.1 ** num_positives
+    # return 1 / (1 + num_positives)
+    return 1 - (num_positives >= 3)
 
+n_groups = int(200000/10)
+epmf = np.zeros(n_groups)
+
+for i in range(n_groups):
+    epmf[i] = np.sum(infections[5*i:5*i+5, :])
 
 def one_stage_group_testing_fixed_household_size(infections, pool_size, shuffle=False):
     population_size = infections.size
@@ -25,12 +32,30 @@ def one_stage_group_testing_fixed_household_size(infections, pool_size, shuffle=
         pools = infections.reshape((num_pools, -1))
 
     num_positives_in_pools = np.sum(pools, axis=1)
+    num_ones = np.sum(num_positives_in_pools == 1)
     results = np.array([st.bernoulli.rvs(1 - false_negative_rate(n)) if n >= 1 else 0 for n in num_positives_in_pools])
     num_false_negatives = np.sum(pools - results.reshape((-1,1)) == 1)
     num_positives = np.sum(pools)
     fnr_group_testing = num_false_negatives / num_positives
-    return fnr_group_testing
+    return fnr_group_testing, num_positives_in_pools
 
+# arr1 = np.empty(1)
+# arr2 = np.empty(1)
+# num_1 = 0
+# num_2 = 0
+# for p in [0.2]:
+#     for i in range(100):
+#         infections = generate_correlated_infections_fixed_household_size(3000, 3, p)
+#         _, c1 = one_stage_group_testing_fixed_household_size(infections, 30, shuffle=False)
+#         _, c2 = one_stage_group_testing_fixed_household_size(infections, 30, shuffle=True)
+#         arr1 = np.append(arr1,c1)
+#         arr2 = np.append(arr2,c2)
+#         num_1 += np.sum(c1==1)
+#         num_2 += np.sum(c2==1)
+
+# print(np.unique(arr1, return_counts=True))
+# print(np.unique(arr2, return_counts=True))
+# print(num_1,num_2)
 
 def simulation_fixed_household_size(population_size, household_size, pool_size, prevalence, num_iters=100):
     fnr_group_testing_with_correlation = np.zeros(num_iters)
@@ -39,8 +64,8 @@ def simulation_fixed_household_size(population_size, household_size, pool_size, 
     print('running simulation for fixed household size under prevalence {} with {} iterations...'.format(prevalence, num_iters))
     for i in range(num_iters):
         infections = generate_correlated_infections_fixed_household_size(population_size, household_size, prevalence)
-        fnr_group_testing_without_correlation[i] = one_stage_group_testing_fixed_household_size(infections, pool_size, shuffle=True)
-        fnr_group_testing_with_correlation[i] = one_stage_group_testing_fixed_household_size(infections, pool_size, shuffle=False)
+        fnr_group_testing_without_correlation[i] = one_stage_group_testing_fixed_household_size(infections, pool_size, shuffle=True)[0]
+        fnr_group_testing_with_correlation[i] = one_stage_group_testing_fixed_household_size(infections, pool_size, shuffle=False)[0]
 
     return fnr_group_testing_without_correlation, fnr_group_testing_with_correlation
 
@@ -57,9 +82,14 @@ def plot_hist(fnr_indep, fnr_correlated, prevalence):
     plt.close()
     return
 
+def main():
+    # for prevalence in [0.005, 0.01, 0.05, 0.1, 0.2]:
+    #     fnr_indep, fnr_correlated = simulation_fixed_household_size(3000, 3, 30, prevalence, 1000)
+    #     print('independent fnr = {}, correlated fnr = {}'.format(np.mean(fnr_indep), np.mean(fnr_correlated)))
+    #     plot_hist(fnr_indep, fnr_correlated, prevalence)
+    fnr_indep, fnr_correlated = simulation_fixed_household_size(3000, 2, 10, 0.5, 1500)
+    print('independent fnr = {}, correlated fnr = {}'.format(np.mean(fnr_indep), np.mean(fnr_correlated)))
+    plot_hist(fnr_indep, fnr_correlated, 0.5)
 
 if __name__ == '__main__':
-    for prevalence in [0.005, 0.01, 0.05, 0.1, 0.2]:
-        fnr_indep, fnr_correlated = simulation_fixed_household_size(3000, 3, 30, prevalence, 1000)
-        print('independent fnr = {}, correlated fnr = {}'.format(np.mean(fnr_indep), np.mean(fnr_correlated)))
-        plot_hist(fnr_indep, fnr_correlated, prevalence)
+    main()

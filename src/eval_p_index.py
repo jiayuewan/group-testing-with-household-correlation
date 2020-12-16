@@ -1,7 +1,7 @@
 from scipy.optimize import fsolve
 import numpy as np
 
-US_dist = [0.2837, 0.3451, 0.1507, 0.1276, 0.0578, 0.0226, 0.0125]
+US_DIST = [0.2837, 0.3451, 0.1507, 0.1276, 0.0578, 0.0226, 0.0125]
 
 # copied from Massey
 def match_prevalence(p_index, target_prevalence, household_dist, SAR):
@@ -28,7 +28,7 @@ def match_prevalence(p_index, target_prevalence, household_dist, SAR):
     return frac_tot_infected - target_prevalence
 
 
-def eval_p_index(match_prevalence, target_prevalence, household_dist=US_dist, SAR=0.3741):
+def eval_p_index(match_prevalence, target_prevalence, household_dist=US_DIST, SAR=0.3741):
     return fsolve(match_prevalence, 0.005, args=(target_prevalence, household_dist, SAR))
 
 
