@@ -3,7 +3,7 @@ import numpy as np
 
 US_DIST = [0.2837, 0.3451, 0.1507, 0.1276, 0.0578, 0.0226, 0.0125]
 
-def compute_household_infection_probability(prevalence, household_dist=US_DIST, SAR=0.3741):
+def compute_household_infection_prob(prevalence, household_dist=US_DIST, SAR=0.3741):
     """
     computes the probability that a household is infected given population level prevalence,
     household size distribution and household secondary attack rate
