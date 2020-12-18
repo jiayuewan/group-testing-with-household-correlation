@@ -27,6 +27,16 @@ def generate_correlated_infections_fixed_household_size(population_size, househo
 # proposal 1: maintain one list of infection status; maintain a second list indicating the first index of each house hold
 # proposal 2 (yes): maintain a list of lists, each inner list represents a household
 def generate_correlated_infections(population_size, prevalence, household_dist=US_DIST, SAR=0.3741):
+    """
+    generate a list of binary lists that describes the infection status of individual based on prevalence,
+    household size distribution and second attack rate
+
+    INPUT:
+    population_size
+    prevalence = population level prevalence
+    household_dist = array-like, probability distribution of household sizes 1, 2, 3, ...
+    SAR = household secondary attack rate
+    """
     max_household_size = len(household_dist)
     p_household = compute_household_infection_prob(prevalence, household_dist, SAR)
     remaining_population_size = population_size
