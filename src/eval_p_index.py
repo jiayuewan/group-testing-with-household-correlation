@@ -1,7 +1,8 @@
 from scipy.optimize import fsolve
 import numpy as np
+from household_dist import US_DIST
 
-US_DIST = [0.2837, 0.3451, 0.1507, 0.1276, 0.0578, 0.0226, 0.0125]
+#US_DIST = [0.2837, 0.3451, 0.1507, 0.1276, 0.0578, 0.0226, 0.0125]
 
 def compute_household_infection_prob(prevalence, household_dist=US_DIST, SAR=0.3741):
     """
@@ -56,8 +57,8 @@ def eval_p_index(match_prevalence, target_prevalence, household_dist=US_DIST, SA
 
 
 if __name__ == '__main__':
-    print("household infection probability (US population): " + str(compute_household_infection_probability(0.01)))
-    print("household infection probability (household size = 3): " + str(compute_household_infection_probability(0.01, household_dist=[0,0,1,0,0,0,0])))
+    print("household infection probability (US population): " + str(compute_household_infection_prob(0.01)))
+    print("household infection probability (household size = 3): " + str(compute_household_infection_prob(0.01, household_dist=[0,0,1])))
 
     # print("find p_index for US household distribution, target prevalence = 0.005: " + str(eval_p_index(match_prevalence, 0.005)))
     # print("find p_index for US household distribution, target prevalence = 0.01: " + str(eval_p_index(match_prevalence, 0.01)))
