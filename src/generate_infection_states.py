@@ -4,6 +4,7 @@ import random
 from collections import Counter
 from eval_p_index import match_prevalence, eval_p_index, compute_household_infection_prob
 from household_dist import US_DIST
+from viral_load_distribution import sample_log10_viral_loads
 
 
 def generate_correlated_infections_fixed_household_size(population_size, household_size, prevalence, SAR=0.3741):
@@ -23,7 +24,7 @@ def generate_correlated_infections_fixed_household_size(population_size, househo
     return infections
 
 
-def generate_correlated_infections(population_size, prevalence, household_dist=US_DIST, SAR=0.3741):
+def generate_correlated_infections(population_size, prevalence, type='binary', household_dist=US_DIST, SAR=0.3741):
     """
     generate a list of binary lists that describes the infection status of individual based on prevalence,
     household size distribution and second attack rate
@@ -46,6 +47,8 @@ def generate_correlated_infections(population_size, prevalence, household_dist=U
         if infected:
             primary_idx = np.random.choice(sampled_household_size)
             sampled_infections = [st.bernoulli.rvs(SAR) if i != primary_idx else 1 for i in range(sampled_household_size)]
+            if type == 'real':
+                sampled_infections = [sample_log10_viral_loads(n_samples=1)[0] if x == 1 else 0 for x in sampled_infections]
         else:
             sampled_infections = [0] * sampled_household_size
 
@@ -55,16 +58,30 @@ def generate_correlated_infections(population_size, prevalence, household_dist=U
     return households
 
 
-if __name__ == '__main__':
-    population_size = 10000
+def main():
+    population_size = 100000
     prevalence = 0.1
     print("testing fixed household size...")
     sampled_households = generate_correlated_infections_fixed_household_size(population_size, 4, prevalence)
     total_num_infections = np.sum(sampled_households)
-    print("total number of sampled infections among {} population under prevalence {} is {}".format(population_size, prevalence, total_num_infections))
+    print("total number of sampled infections among {} population under prevalence {} is {}".format(population_size,
+        prevalence, total_num_infections))
+
     print("testing variable household size...")
     sampled_households = generate_correlated_infections(population_size, prevalence)
     total_num_infections = sum(sum(x) for x in sampled_households)
     household_sizes = Counter([len(x) for x in sampled_households])
-    print("total number of sampled infections among {} population is {}".format(population_size, total_num_infections))
+    print("total number of sampled infections among {} population under prevalence {} is {}".format(population_size,
+        prevalence, total_num_infections))
     print("sampled household size distribution is: " + str([(i, household_sizes[i] / len(sampled_households)) for i in household_sizes]))
+
+    population_size = 20
+    prevalence = 0.5
+
+    print("testing viral loads for variable household size...")
+    sampled_households = generate_correlated_infections(population_size, prevalence, type='real')
+    print(sampled_households)
+
+
+if __name__ == '__main__':
+    main()
