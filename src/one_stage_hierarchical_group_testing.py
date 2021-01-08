@@ -121,9 +121,9 @@ def main():
 
     print("testing one-stage group testing for US household distribution with VL data...")
     infections = generate_correlated_infections(10000, 0.01, type='real')
-    fnr_indep = one_stage_group_testing(infections, pool_size=10, type="real", shuffle=True)[0]
-    fnr_correlated = one_stage_group_testing(infections, pool_size=10, type="real", shuffle=False)[0]
-    print('independent fnr = {}, correlated fnr = {}'.format(fnr_indep, fnr_correlated))
+    fnr_indep, num_tests_indep = one_stage_group_testing(infections, pool_size=10, type="real", shuffle=True)[:2]
+    fnr_correlated, num_tests_correlated = one_stage_group_testing(infections, pool_size=10, type="real", shuffle=False)[:2]
+    print('independent fnr = {}, correlated fnr = {}, num tests indep = {}, num tests corr = {}'.format(fnr_indep, fnr_correlated, num_tests_indep, num_tests_correlated))
     return
 
 if __name__ == '__main__':
