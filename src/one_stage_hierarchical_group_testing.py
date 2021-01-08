@@ -120,7 +120,7 @@ def main():
     # print('independent fnr = {}, correlated fnr = {}'.format(fnr_indep, fnr_correlated))
 
     print("testing one-stage group testing for US household distribution with VL data...")
-    infections = generate_correlated_infections(10000, 0.1, type='real')
+    infections = generate_correlated_infections(10000, 0.01, type='real')
     fnr_indep = one_stage_group_testing(infections, pool_size=10, type="real", shuffle=True)[0]
     fnr_correlated = one_stage_group_testing(infections, pool_size=10, type="real", shuffle=False)[0]
     print('independent fnr = {}, correlated fnr = {}'.format(fnr_indep, fnr_correlated))
