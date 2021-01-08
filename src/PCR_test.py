@@ -26,7 +26,7 @@ def false_negative_rate_binary(num_positives, type='exp'):
         return 1 - (num_positives >= 3)
 
 
-def pooled_PCR_test(mu, params=PCR_PARAMS):
+def pooled_PCR_test(mu, individual=False, params=PCR_PARAMS):
     """
     Perform one pooled pcr test and output the test result
 
@@ -36,24 +36,46 @@ def pooled_PCR_test(mu, params=PCR_PARAMS):
 
     OUTPUT: 1 for test positive; 0 for test negative
     """
-    V_sample = params['V_sample']
-    c_1 = params['c_1']
-    gamma = params['gamma']
-    c_2 = params['c_2']
-    LoD = params['LoD']
-    pool_size = len(mu)
+    if individual:
+        V_sample = params['V_sample']
+        c_1 = params['c_1']
+        gamma = params['gamma']
+        c_2 = params['c_2']
+        LoD = params['LoD']
 
-    # copies of RNA in a subsample that is c_1 the original volume
-    N_subsamples = np.random.binomial(V_sample * mu, c_1 / pool_size)
-    N_pre_extraction = np.sum(N_subsamples)
+        # copies of RNA in a subsample that is c_1 the original volume
+        N_subsamples = np.random.binomial(V_sample * mu, c_1)
+        N_pre_extraction = N_subsamples
 
-    # copies of extracted RNA in the subsample
-    N_extracted = np.random.binomial(N_pre_extraction, gamma)
+        # copies of extracted RNA in the subsample
+        N_extracted = np.random.binomial(N_pre_extraction, gamma)
 
-    # copies of RNA in PCR template that is c_2 of the previous step's eluted quantity
-    N_template = np.random.binomial(N_extracted, c_2)
+        # copies of RNA in PCR template that is c_2 of the previous step's eluted quantity
+        N_templates = np.random.binomial(N_extracted, c_2)
+        return N_templates >= LoD
 
-    return int(N_template >= LoD)
+    else:
+        if np.sum(mu) == 0:
+            return 0
+
+        V_sample = params['V_sample']
+        c_1 = params['c_1']
+        gamma = params['gamma']
+        c_2 = params['c_2']
+        LoD = params['LoD']
+        pool_size = len(mu)
+
+        # copies of RNA in a subsample that is c_1 the original volume
+        N_subsamples = np.random.binomial(V_sample * mu, c_1 / pool_size)
+        N_pre_extraction = np.sum(N_subsamples)
+
+        # copies of extracted RNA in the subsample
+        N_extracted = np.random.binomial(N_pre_extraction, gamma)
+
+        # copies of RNA in PCR template that is c_2 of the previous step's eluted quantity
+        N_templates = np.random.binomial(N_extracted, c_2)
+
+        return int(N_templates >= LoD)
 
 # deprecated
 def eval_FNR(mu, params=PCR_PARAMS, n_iter=1000):
@@ -62,17 +84,17 @@ def eval_FNR(mu, params=PCR_PARAMS, n_iter=1000):
 
     detected = 0
     for j in range(n_iter):
-        detected += one_PCR_test(mu, params)
+        detected += pooled_PCR_test(mu, params)
 
     return 1 - detected / n_iter
 
 
 if __name__ == '__main__':
-    print('')
+    print(pooled_PCR_test(np.array([0, 0, 0])))
+    print(pooled_PCR_test(np.array([100, 100, 1000])))
 
-    # n_iter = 100
-    # mu_list = 10 ** np.linspace(-2, 4, 61)
-    # FNRs = np.zeros(len(mu_list))
-    # for i in range(len(mu_list)):
-    #     FNRs[i] = eval_FNR(mu_list[i])
-    # print(FNRs)
+    mu_list = 10 ** np.linspace(-2, 4, 61)
+    FNRs = np.zeros(len(mu_list))
+    for i in range(len(mu_list)):
+        FNRs[i] = eval_FNR([mu_list[i]])
+    print(FNRs)
