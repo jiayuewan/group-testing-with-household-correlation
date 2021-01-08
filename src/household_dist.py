@@ -1,6 +1,6 @@
 """
 Household distributions for different countries:
-percentage of households that consists of 1, 2, 3, 4, 5, 6+ individuals
+fraction of households that consists of 1, 2, 3, 4, 5, 6+ individuals
 """
 
 
