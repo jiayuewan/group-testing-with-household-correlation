@@ -26,7 +26,7 @@ def generate_correlated_infections_fixed_household_size(population_size, househo
 
 def generate_correlated_infections(population_size, prevalence, type='binary', household_dist=US_DIST, SAR=0.3741):
     """
-    generate a list of binary lists that describes the infection status of individual based on prevalence,
+    generate a list of lists that describes the infection status of individual based on prevalence,
     household size distribution and second attack rate
 
     INPUT:
@@ -48,7 +48,8 @@ def generate_correlated_infections(population_size, prevalence, type='binary', h
             primary_idx = np.random.choice(sampled_household_size)
             sampled_infections = [st.bernoulli.rvs(SAR) if i != primary_idx else 1 for i in range(sampled_household_size)]
             if type == 'real':
-                sampled_infections = [sample_log10_viral_loads(n_samples=1)[0] if x == 1 else 0 for x in sampled_infections]
+                #sampled_infections = [sample_log10_viral_loads(n_samples=1)[0] if x == 1 else 0 for x in sampled_infections]
+                sampled_infections = [a * b for a , b in zip(sampled_infections, sample_log10_viral_loads(n_samples=sampled_household_size))]
         else:
             sampled_infections = [0] * sampled_household_size
 

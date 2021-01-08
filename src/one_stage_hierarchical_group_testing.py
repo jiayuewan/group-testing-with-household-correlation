@@ -59,13 +59,13 @@ def one_stage_group_testing(infections, pool_size, type='binary', shuffle=False)
         pools = pools.reshape((num_pools, -1))
     else:
         pools = np.zeros((num_pools, pool_size))
-        capacities = [pool_size] * num_pools
+        capacities = [pool_size] * num_pools # remaining capacity in each pool
         for household_infections in infections:
             household_size = len(household_infections)
             pool_idx = next((i for i, c in enumerate(capacities) if c >= household_size), -1)
             if pool_idx != -1:
-                start = pool_size - capacities[pool_idx]
-                pools[pool_idx, start:start + household_size] = household_infections
+                loc = pool_size - capacities[pool_idx]
+                pools[pool_idx, loc:loc + household_size] = household_infections
                 capacities[pool_idx] -= household_size
             else:
                 last_pool = next(i for i, c in enumerate(np.cumsum(capacities)) if c >= household_size) # last pool for the household to be placed into
@@ -76,8 +76,8 @@ def one_stage_group_testing(infections, pool_size, type='binary', shuffle=False)
                     capacities[i] = 0
 
                 to_allocate_in_last_pool = household_size - allocated
-                start = pool_size - capacities[last_pool]
-                pools[last_pool, start: start + to_allocate_in_last_pool] = household_infections[allocated:]
+                loc = pool_size - capacities[last_pool]
+                pools[last_pool, loc: loc + to_allocate_in_last_pool] = household_infections[allocated:]
                 capacities[last_pool] -= to_allocate_in_last_pool
 
     if type == "binary":
