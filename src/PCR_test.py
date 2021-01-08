@@ -31,7 +31,9 @@ def pooled_PCR_test(mu, individual=False, params=PCR_PARAMS):
     Perform one pooled pcr test and output the test result
 
     INPUT:
-    mu = array of viral loads (copies/mL) in the sample to be put in the same pool;
+    mu = array of viral loads (copies/mL) in the samples to be put in the same pool if individual = False,
+    (m x k) 2d array of viral loads (copies/mL) in the samples if individual = True
+    individual= boolean, True if performing an individual PCR test, False if performing an pooled sample PCR test
     params = PCR test parameters for subsampling and dilution
 
     OUTPUT: 1 for test positive; 0 for test negative
