@@ -1,7 +1,8 @@
 import numpy as np
+import viral_load_distribution
 
 
-PCR_PARAMS = {'V_sample': 1, 'c_1': 1/10, 'gamma': 1/2, 'c_2': 1, 'LoD': 10}
+PCR_PARAMS = {'V_sample': 1, 'c_1': 1/10, 'gamma': 1/2, 'c_2': 1, 'LoD': 100}
 
 
 def false_negative_rate_binary(num_positives, type='exp'):
@@ -95,8 +96,8 @@ if __name__ == '__main__':
     print(pooled_PCR_test(np.array([0, 0, 0])))
     print(pooled_PCR_test(np.array([100, 100, 1000])))
 
-    mu_list = 10 ** np.linspace(-2, 4, 61)
-    FNRs = np.zeros(len(mu_list))
-    for i in range(len(mu_list)):
-        FNRs[i] = eval_FNR([mu_list[i]])
-    print(FNRs)
+    sample_size = 20000
+    log10_mu_list = viral_load_distribution.sample_log10_viral_loads(sample_size)
+    mu_list = [[10 ** log10_mu_list[i]] for i in range(sample_size)]
+    FNs = len(mu_list)-sum([pooled_PCR_test(mu_list[i], individual = False) for i in range(sample_size)])
+    print(FNs/sample_size)
