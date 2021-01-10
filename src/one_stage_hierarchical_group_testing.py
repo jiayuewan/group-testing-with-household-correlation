@@ -3,7 +3,7 @@ import scipy.stats as st
 import random
 from household_dist import US_DIST
 from generate_infection_states import generate_correlated_infections, generate_correlated_infections_fixed_household_size
-from pcr_test import false_negative_rate_binary, pooled_PCR_test
+from PCR_test import false_negative_rate_binary, pooled_PCR_test
 
 
 def one_stage_group_testing_fixed_household_size(infections, pool_size, shuffle=False):

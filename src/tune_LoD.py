@@ -5,7 +5,7 @@ import scipy.stats as st
 import scipy.optimize as opt
 import matplotlib.pyplot as plt
 
-sample = 10**VL_dist.sample_log10_VL(10000)
+sample = 10 ** VL_dist.sample_log10_VL(10000)
 
 base_params = {'V_sample': 1, 'c_1': 1/20, 'gamma': 1/2, 'c_2': 1, 'LoD':20}
 
