@@ -37,7 +37,7 @@ def one_stage_group_testing_fixed_household_size(infections, pool_size, shuffle=
     return fnr_group_testing, num_positives_in_pools
 
 
-def one_stage_group_testing(infections, pool_size, type='binary', shuffle=False):
+def one_stage_group_testing(infections, pool_size, type='binary', LoD=None, shuffle=False):
     """
     perform one-stage hierarchical group testing.
 
@@ -46,6 +46,7 @@ def one_stage_group_testing(infections, pool_size, type='binary', shuffle=False)
     pool_size: Int, number of samples in a pooled test
     type: 'binary' if the infection state is binary,
         'real' if the infection state is the individual's Log10 viral load
+    LoD: limit of detection of the PCR test. Should only be specified if type == 'real'
     shuffle: boolean, whether to randomly place individuals into the pools or to assign pools based on households
     """
     population_size = len(sum(infections,[]))
@@ -93,16 +94,21 @@ def one_stage_group_testing(infections, pool_size, type='binary', shuffle=False)
         convert_log10_viral_load = lambda x: int(10 ** x) if x > 0 else 0
         convert_log10_viral_load = np.vectorize(convert_log10_viral_load)
         viral_loads =  convert_log10_viral_load(pools)
-        #has_positives_in_pools = np.sum(pools, axis=1) > 0
 
-        group_testing_results = np.apply_along_axis(pooled_PCR_test, 1, viral_loads)
+        if LoD:
+            group_testing_results = pooled_PCR_test(viral_loads, LoD=LoD)
+        else:
+            group_testing_results = pooled_PCR_test(viral_loads)
         num_positive_pools = np.sum(group_testing_results)
         group_testing_results = np.repeat(group_testing_results.reshape((-1,1)), pool_size, axis=1)
-        #group_testing_results = np.array([pooled_PCR_test(viral_loads[i, :]) if has_positives_in_pools[i] else 0 for i in range(num_pools)])
-        individual_testing_results = pooled_PCR_test(viral_loads, individual=True)
-        final_results = group_testing_results  * individual_testing_results
-        expected_outcomes = pools > 0
 
+        if LoD:
+            individual_testing_results = pooled_PCR_test(viral_loads, individual=True, LoD=LoD)
+        else:
+            individual_testing_results = pooled_PCR_test(viral_loads, individual=True)
+
+        final_results = (group_testing_results  * individual_testing_results).astype(int)
+        expected_outcomes = pools > 0
         num_false_negatives = np.sum(expected_outcomes - final_results == 1)
         num_positives = np.sum(expected_outcomes)
         fnr_group_testing = num_false_negatives / num_positives
@@ -120,9 +126,9 @@ def main():
     # print('independent fnr = {}, correlated fnr = {}'.format(fnr_indep, fnr_correlated))
 
     print("testing one-stage group testing for US household distribution with VL data...")
-    infections = generate_correlated_infections(10000, 0.01, type='real')
-    fnr_indep, num_tests_indep = one_stage_group_testing(infections, pool_size=10, type="real", shuffle=True)[:2]
-    fnr_correlated, num_tests_correlated = one_stage_group_testing(infections, pool_size=10, type="real", shuffle=False)[:2]
+    infections = generate_correlated_infections(12000, 0.05, type='real')
+    fnr_indep, num_tests_indep = one_stage_group_testing(infections, pool_size=6, LoD=174, type="real", shuffle=True)[:2]
+    fnr_correlated, num_tests_correlated = one_stage_group_testing(infections, pool_size=6, LoD=174, type="real", shuffle=False)[:2]
     print('independent fnr = {}, correlated fnr = {}, num tests indep = {}, num tests corr = {}'.format(fnr_indep, fnr_correlated, num_tests_indep, num_tests_correlated))
     return
 
