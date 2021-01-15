@@ -21,7 +21,7 @@ def plot_hist(fnr_indep, fnr_correlated, prevalence, pool_size):
     plt.xlabel(r"$FNR_{corr} - FNR_{indep}$")
     plt.ylabel('Frequency')
     plt.title('difference in false negative rate between correlated \n and independent group testing under prevalence {}'.format(prevalence))
-    plt.savefig('../figs/experiment_1/variable_household_fnr_diff_prev_{}_pool_size_{}.pdf'.format(prevalence, pool_size))
+    plt.savefig('../figs/experiment_1/fnr_diff_prev_{}_pool_size_{}.pdf'.format(prevalence, pool_size))
     plt.close()
     return
 
