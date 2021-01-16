@@ -3,7 +3,7 @@ import scipy.stats as st
 import random
 from collections import Counter
 from eval_p_index import match_prevalence, eval_p_index, compute_household_infection_prob
-from household_dist import US_DIST
+from household_dist import HOUSEHOLD_DIST
 from viral_load_distribution import sample_log10_viral_loads
 
 
@@ -24,7 +24,7 @@ def generate_correlated_infections_fixed_household_size(population_size, househo
     return infections
 
 
-def generate_correlated_infections(population_size, prevalence, type='binary', household_dist=US_DIST, SAR=0.3741):
+def generate_correlated_infections(population_size, prevalence, type='binary', household_dist='US_DIST', SAR=0.3741):
     """
     generate a list of lists that describes the infection status of individual based on prevalence,
     household size distribution and second attack rate
@@ -35,6 +35,7 @@ def generate_correlated_infections(population_size, prevalence, type='binary', h
     household_dist = array-like, probability distribution of household sizes 1, 2, 3, ...
     SAR = household secondary attack rate
     """
+    household_dist = HOUSEHOLD_DIST[household_dist]
     max_household_size = len(household_dist)
     p_household = compute_household_infection_prob(prevalence, household_dist, SAR)
     remaining_population_size = population_size

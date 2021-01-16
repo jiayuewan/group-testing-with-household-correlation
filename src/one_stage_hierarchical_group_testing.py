@@ -1,7 +1,6 @@
 import numpy as np
 import scipy.stats as st
 import random
-from household_dist import US_DIST
 from generate_infection_states import generate_correlated_infections, generate_correlated_infections_fixed_household_size
 from PCR_test import false_negative_rate_binary, pooled_PCR_test
 
@@ -114,8 +113,8 @@ def one_stage_group_testing(infections, pool_size, type='binary', LoD=None, shuf
         fnr_group_testing = num_false_negatives / num_positives
         total_num_tests = num_pools + num_positive_pools * pool_size
         num_positives_in_pools = np.sum(pools > 0, axis=1)
-
-        return fnr_group_testing, total_num_tests, num_positives_in_pools
+        efficiency = population_size / total_num_tests
+        return fnr_group_testing, efficiency, num_positives_in_pools
 
 
 def main():
@@ -126,7 +125,7 @@ def main():
     # print('independent fnr = {}, correlated fnr = {}'.format(fnr_indep, fnr_correlated))
 
     print("testing one-stage group testing for US household distribution with VL data...")
-    infections = generate_correlated_infections(12000, 0.05, type='real')
+    infections = generate_correlated_infections(12000, 0.01, type='real', SAR=0.188)
     fnr_indep, num_tests_indep = one_stage_group_testing(infections, pool_size=6, LoD=174, type="real", shuffle=True)[:2]
     fnr_correlated, num_tests_correlated = one_stage_group_testing(infections, pool_size=6, LoD=174, type="real", shuffle=False)[:2]
     print('independent fnr = {}, correlated fnr = {}, num tests indep = {}, num tests corr = {}'.format(fnr_indep, fnr_correlated, num_tests_indep, num_tests_correlated))

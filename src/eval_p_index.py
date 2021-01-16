@@ -1,9 +1,9 @@
 from scipy.optimize import fsolve
 import numpy as np
-from household_dist import US_DIST
+from household_dist import HOUSEHOLD_DIST
 
 
-def compute_household_infection_prob(prevalence, household_dist=US_DIST, SAR=0.3741):
+def compute_household_infection_prob(prevalence, household_dist, SAR=0.3741):
     """
     computes the probability that a household is infected given population level prevalence,
     household size distribution and household secondary attack rate
@@ -51,10 +51,11 @@ def match_prevalence(p_index, target_prevalence, household_dist, SAR):
 
 
 # deprecated, modified from Massey's groupt testing code
-def eval_p_index(match_prevalence, target_prevalence, household_dist=US_DIST, SAR=0.3741):
+def eval_p_index(match_prevalence, target_prevalence, household_dist, SAR=0.3741):
     return fsolve(match_prevalence, 0.005, args=(target_prevalence, household_dist, SAR))
 
 
 if __name__ == '__main__':
-    print("household infection probability (US population): " + str(compute_household_infection_prob(0.01)))
+    household_dist = HOUSEHOLD_DIST['US_DIST']
+    print("household infection probability (US population): " + str(compute_household_infection_prob(0.01, household_dist)))
     print("household infection probability (household size = 3): " + str(compute_household_infection_prob(0.01, household_dist=[0,0,1])))
