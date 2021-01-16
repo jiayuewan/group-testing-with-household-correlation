@@ -1,50 +1,90 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
-from household_dist import US_DIST, CN_DIST, AUS_DIST, FR_DIST
+from household_dist import HOUSEHOLD_DIST
 from generate_infection_states import generate_correlated_infections
 from one_stage_hierarchical_group_testing import one_stage_group_testing
+from plotting_helpers import plot_hist_exp_2
+
+NOMINAL_PARAMS = {
+"pool size": 6,
+"prevalence": 0.01,
+"household dist": 'US_DIST',
+"SAR": 0.188,
+"FNR": 0.05
+}
+
+def simulation_variable_household_size(population_size, params=NOMINAL_PARAMS, num_iters=500):
+    # simulation results: fnr_indep, fnr_corr, efficiency_indep, efficiency_corr
+    pool_size = params['pool size']
+    prevalence = params['prevalence']
+    household_dist = params['household dist']
+    SAR = params['SAR']
+    FNR = params['FNR']
+
+    if not FNR in [0.025, 0.05, 0.1]:
+        raise ValueError("supported FNR values do not include {}".format(FNR))
+    else:
+        LoD = 108 if FNR == 0.025 else 174 if FNR == 0.05 else 345
+
+    print('running simulation under r = {}, n = {}, FNR = {}, SAR = {}, dist = {} with {} iterations...'.format(prevalence, pool_size, FNR, SAR, household_dist, num_iters))
+    results = np.zeros((num_iters, 4))
+    for i in range(num_iters):
+        infections = generate_correlated_infections(population_size, prevalence, type='real', household_dist=household_dist, SAR=SAR)
+
+        fnr_indep, eff_indep = one_stage_group_testing(infections, pool_size=6, LoD=174, type="real", shuffle=True)[:2]
+        fnr_correlated, eff_corr = one_stage_group_testing(infections, pool_size=6, LoD=174, type="real", shuffle=False)[:2]
+        #print(fnr_indep, fnr_correlated, eff_indep, eff_corr)
+        results[i, :] = [fnr_indep, fnr_correlated, eff_indep, eff_corr]
+
+    return results
 
 
-def plot_hist(fnr_indep, fnr_correlated, prevalence, pool_size):
-    assert len(fnr_indep) == len(fnr_correlated)
 
-    num_iters = len(fnr_indep)
-    plt.hist([fnr_indep, fnr_correlated], label=['independent group testing', 'correlated group testing'], alpha=0.5)
-    plt.legend(loc='upper right')
-    plt.xlabel('False negative rate')
-    plt.ylabel('Frequency')
-    plt.title('Histogram of FNR values for one-stage group testing \n under prevalence = {}'.format(prevalence))
-    plt.savefig('../figs/experiment_2/fnr_prev_{}_pool_size_{}.pdf'.format(prevalence, pool_size))
-    plt.close()
+def run_simulations_for_sensitivity_analysis():
+    pop_size = 12000
+    num_iters = 500
+    houshold_dists = list(HOUSEHOLD_DIST.keys())
+    houshold_dists.remove('US_DIST')
 
-    plt.hist(fnr_correlated -  fnr_indep)
-    plt.xlabel(r"$FNR_{corr} - FNR_{indep}$")
-    plt.ylabel('Frequency')
-    plt.title('difference in false negative rate between correlated \n and independent group testing under prevalence {}'.format(prevalence))
-    plt.savefig('../figs/experiment_2/fnr_diff_prev_{}_pool_size_{}.pdf'.format(prevalence, pool_size))
-    plt.close()
+    configs = {
+    'prevalence' :[0.001, 0.005, 0.05, 0.1],
+    'SAR' : [0.039, 0.154, 0.222, 0.446],
+    'pool size': [3, 12, 24],
+    'FNR': [0.025, 0.1],
+    'household dist': houshold_dists
+    }
+
+    results = simulation_variable_household_size(pop_size, params=NOMINAL_PARAMS, num_iters=num_iters)
+    plot_hist_exp_2(results, "nominal")
+    avgs = np.mean(results, axis=0)
+    print('indep fnr = {}, corr fnr = {}, indep eff = {}, corr eff = {}'.format(avgs[0], avgs[1], avgs[2], avgs[3]))
+    with open('../results/experiment_2/sensitivity_analysis/results_nominal.data', 'wb') as f:
+        np.savetxt(f, results)
+
+    for param, values in configs.items():
+        for val in values:
+            params = NOMINAL_PARAMS.copy()
+            params[param] = val
+
+            results = simulation_variable_household_size(pop_size, params=params, num_iters=num_iters)
+            plot_hist_exp_2(results, param, val)
+            avgs = np.mean(results, axis=0)
+            print('indep fnr = {}, corr fnr = {}, indep eff = {}, corr eff = {}'.format(avgs[0], avgs[1], avgs[2], avgs[3]))
+
+            with open('../results/experiment_2/sensitivity_analysis/results_{}={}.data'.format(param, val), 'wb') as f:
+                np.savetxt(f, results)
     return
 
 
-def simulation_variable_household_size(population_size, pool_size, prevalence, household_dist=US_DIST, SAR=0.3741, num_iters=1000):
-    fnr_group_testing_with_correlation = np.zeros(num_iters)
-    fnr_group_testing_without_correlation = np.zeros(num_iters)
-    eff_group_testing_with_correlation = np.zeros(num_iters)
-    eff_group_testing_without_correlation = np.zeros(num_iters)
+# sensitivity analyses: plot for fnr_indep and fnr_corr vs one parameter; plot for efficiency indep + corr vs one parameter
+def generate_sensitivity_plots():
+    return
 
-    print('running simulation for population size {} under prevalence {} with {} iterations...'.format(population_size, prevalence, num_iters))
-    for i in range(num_iters):
-        infections = generate_correlated_infections(population_size, prevalence, household_dist=household_dist, SAR=SAR)
-
-        fnr_group_testing_without_correlation[i] = one_stage_group_testing(infections, pool_size, type="binary", shuffle=True)[0]
-        fnr_group_testing_with_correlation[i] = one_stage_group_testing(infections, pool_size, household_size="variable", shuffle=False)[0]
-
-    return fnr_group_testing_without_correlation, fnr_group_testing_with_correlation
-
-
-# consider nominal;
-# sensitivity analyses: for each, plot for fnr_indep and fnr_corr vs one parameter; plot for efficiency indep + corr vs one parameter
 # pareto fontier
-# add LoD to the parameter usign args?
-# save all the simulation results based on param values
+def generate_pareto_frontier_plots():
+    return
+
+
+if __name__ == '__main__':
+    run_simulations_for_sensitivity_analysis()
