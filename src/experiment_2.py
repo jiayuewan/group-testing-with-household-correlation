@@ -90,7 +90,7 @@ def run_simulations_for_pareto_fontier():
         for n in pool_sizes:
             params = NOMINAL_PARAMS.copy()
             params['prevalence'] = p
-            params['pool_size'] = n
+            params['pool size'] = n
 
             results = simulation_variable_household_size(pop_size, params=params, num_iters=num_iters)
             avgs = np.mean(results, axis=0)
