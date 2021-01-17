@@ -24,7 +24,7 @@ def generate_correlated_infections_fixed_household_size(population_size, househo
     return infections
 
 
-def generate_correlated_infections(population_size, prevalence, type='binary', household_dist='US_DIST', SAR=0.3741):
+def generate_correlated_infections(population_size, prevalence, type='binary', household_dist='US', SAR=0.3741):
     """
     generate a list of lists that describes the infection status of individual based on prevalence,
     household size distribution and second attack rate

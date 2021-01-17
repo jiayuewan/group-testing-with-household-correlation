@@ -4,15 +4,17 @@ import pickle
 from household_dist import HOUSEHOLD_DIST
 from generate_infection_states import generate_correlated_infections
 from one_stage_hierarchical_group_testing import one_stage_group_testing
-from plotting_helpers import plot_hist_exp_2
+from plotting_helpers import plot_hist_exp_2, generate_sensitivity_plots
+
 
 NOMINAL_PARAMS = {
 "pool size": 6,
 "prevalence": 0.01,
-"household dist": 'US_DIST',
+"household dist": 'US',
 "SAR": 0.188,
 "FNR": 0.05
 }
+
 
 def simulation_variable_household_size(population_size, params=NOMINAL_PARAMS, num_iters=500):
     # simulation results: fnr_indep, fnr_corr, efficiency_indep, efficiency_corr
@@ -45,7 +47,7 @@ def run_simulations_for_sensitivity_analysis():
     pop_size = 12000
     num_iters = 500
     houshold_dists = list(HOUSEHOLD_DIST.keys())
-    houshold_dists.remove('US_DIST')
+    houshold_dists.remove('US')
 
     configs = {
     'prevalence' :[0.001, 0.005, 0.05, 0.1],
@@ -59,7 +61,9 @@ def run_simulations_for_sensitivity_analysis():
     plot_hist_exp_2(results, "nominal")
     avgs = np.mean(results, axis=0)
     print('indep fnr = {}, corr fnr = {}, indep eff = {}, corr eff = {}'.format(avgs[0], avgs[1], avgs[2], avgs[3]))
-    with open('../results/experiment_2/sensitivity_analysis/results_nominal.data', 'wb') as f:
+    nominal_filedir = '../results/experiment_2/sensitivity_analysis/results_prevalence={}_SAR={}_pool size={}_FNR={}_household_dist={}.data'.format(\
+        NOMINAL_PARAMS['prevalence'], NOMINAL_PARAMS['SAR'], NOMINAL_PARAMS['pool size'], NOMINAL_PARAMS['FNR'], NOMINAL_PARAMS['household dist'])
+    with open(nominal_filedir, 'wb') as f:
         np.savetxt(f, results)
 
     for param, values in configs.items():
@@ -77,14 +81,13 @@ def run_simulations_for_sensitivity_analysis():
     return
 
 
-# sensitivity analyses: plot for fnr_indep and fnr_corr vs one parameter; plot for efficiency indep + corr vs one parameter
-def generate_sensitivity_plots():
+def run_simulations_for_pareto_fontier():
     return
 
-# pareto fontier
-def generate_pareto_frontier_plots():
-    return
 
 
 if __name__ == '__main__':
     run_simulations_for_sensitivity_analysis()
+
+    for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
+        generate_sensitivity_plots(param)

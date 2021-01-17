@@ -56,6 +56,6 @@ def eval_p_index(match_prevalence, target_prevalence, household_dist, SAR=0.3741
 
 
 if __name__ == '__main__':
-    household_dist = HOUSEHOLD_DIST['US_DIST']
+    household_dist = HOUSEHOLD_DIST['US']
     print("household infection probability (US population): " + str(compute_household_infection_prob(0.01, household_dist)))
     print("household infection probability (household size = 3): " + str(compute_household_infection_prob(0.01, household_dist=[0,0,1])))
