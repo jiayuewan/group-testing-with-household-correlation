@@ -28,12 +28,16 @@ def one_stage_group_testing_fixed_household_size(infections, pool_size, shuffle=
         pools = infections.reshape((num_pools, -1))
 
     num_positives_in_pools = np.sum(pools, axis=1)
-    #num_positive_pools = np.sum(num_positives_in_pools == 1)
     results = np.array([st.bernoulli.rvs(1 - false_negative_rate_binary(n)) if n >= 1 else 0 for n in num_positives_in_pools])
+    num_positive_pools = np.sum(results)
     num_false_negatives = np.sum(pools - results.reshape((-1,1)) == 1)
     num_positives = np.sum(pools)
     fnr_group_testing = num_false_negatives / num_positives
-    return fnr_group_testing, num_positives_in_pools
+
+    total_num_tests = num_pools + num_positive_pools * pool_size
+    efficiency = population_size / total_num_tests
+
+    return fnr_group_testing, efficiency, num_positives_in_pools
 
 
 def one_stage_group_testing(infections, pool_size, type='binary', LoD=None, shuffle=False):
@@ -118,18 +122,18 @@ def one_stage_group_testing(infections, pool_size, type='binary', LoD=None, shuf
 
 
 def main():
-    # print("testing one-stage group testing for fixed household size...")
-    # infections = generate_correlated_infections_fixed_household_size(10000, 4, 0.1)
-    # fnr_indep = one_stage_group_testing_fixed_household_size(infections, 20, shuffle=True)[0]
-    # fnr_correlated = one_stage_group_testing_fixed_household_size(infections, 20, shuffle=False)[0]
-    # print('independent fnr = {}, correlated fnr = {}'.format(fnr_indep, fnr_correlated))
+    print("testing one-stage group testing for fixed household size...")
+    infections = generate_correlated_infections_fixed_household_size(10000, 4, 0.1)
+    fnr_indep, eff_indep = one_stage_group_testing_fixed_household_size(infections, 20, shuffle=True)[:2]
+    fnr_corr, eff_corr = one_stage_group_testing_fixed_household_size(infections, 20, shuffle=False)[:2]
+    print('indep fnr = {}, corr fnr = {}, indep eff = {}, corr eff = {}'.format(fnr_indep, fnr_corr, eff_indep, eff_corr))
 
-    print("testing one-stage group testing for US household distribution with VL data...")
-    infections = generate_correlated_infections(12000, 0.01, type='real', SAR=0.188)
-    fnr_indep, num_tests_indep = one_stage_group_testing(infections, pool_size=6, LoD=174, type="real", shuffle=True)[:2]
-    fnr_correlated, num_tests_correlated = one_stage_group_testing(infections, pool_size=6, LoD=174, type="real", shuffle=False)[:2]
-    print('independent fnr = {}, correlated fnr = {}, num tests indep = {}, num tests corr = {}'.format(fnr_indep, fnr_correlated, num_tests_indep, num_tests_correlated))
-    return
+    # print("testing one-stage group testing for US household distribution with VL data...")
+    # infections = generate_correlated_infections(12000, 0.01, type='real', SAR=0.188)
+    # fnr_indep, num_tests_indep = one_stage_group_testing(infections, pool_size=6, LoD=174, type="real", shuffle=True)[:2]
+    # fnr_correlated, num_tests_correlated = one_stage_group_testing(infections, pool_size=6, LoD=174, type="real", shuffle=False)[:2]
+    # print('independent fnr = {}, correlated fnr = {}, num tests indep = {}, num tests corr = {}'.format(fnr_indep, fnr_correlated, num_tests_indep, num_tests_correlated))
+    # return
 
 if __name__ == '__main__':
     main()

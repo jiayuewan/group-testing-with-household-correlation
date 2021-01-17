@@ -4,23 +4,26 @@ import numpy as np
 import pandas as pd
 
 
-def plot_hist_exp_1(fnr_indep, fnr_correlated, prevalence, pool_size):
-    assert len(fnr_indep) == len(fnr_correlated)
+def plot_hist_exp_1(results, household_size, pool_size, prevalence):
+    fnr_indep = results[:, 0]
+    fnr_correlated = results[:, 1]
+    eff_indep = results[:, 2]
+    eff_correlated = results[:, 3]
 
-    num_iters = len(fnr_indep)
     plt.hist([fnr_indep, fnr_correlated], label=['independent group testing', 'correlated group testing'], alpha=0.5)
     plt.legend(loc='upper right')
     plt.xlabel('False negative rate')
     plt.ylabel('Frequency')
-    plt.title('Histogram of FNR values for one-stage group testing \n under prevalence = {}'.format(prevalence))
-    plt.savefig('../figs/experiment_1/fnr_prev_{}_pool_size_{}.pdf'.format(prevalence, pool_size))
+    plt.title('Histogram of FNR values for one-stage group testing \n under household size = {}, pool size = {}, prevalence = {}'.format(household_size, pool_size, prevalence))
+    plt.savefig('../figs/experiment_1/fnr_pool-size={}_household-size={}_prevalence={}.pdf'.format(pool_size, household_size, prevalence))
     plt.close()
 
-    plt.hist(fnr_correlated -  fnr_indep)
-    plt.xlabel(r"$FNR_{corr} - FNR_{indep}$")
+    plt.hist([eff_indep, eff_correlated], label=['independent group testing', 'correlated group testing'], alpha=0.5)
+    plt.legend(loc='upper right')
+    plt.xlabel('Efficiency')
     plt.ylabel('Frequency')
-    plt.title('difference in false negative rate between correlated \n and independent group testing under prevalence {}'.format(prevalence))
-    plt.savefig('../figs/experiment_1/fnr_diff_prev_{}_pool_size_{}.pdf'.format(prevalence, pool_size))
+    plt.title('Histogram of testing efficiency for one-stage group testing \n under household size = {}, pool size = {}, prevalence = {}'.format(household_size, pool_size, prevalence))
+    plt.savefig('../figs/experiment_1/eff_pool-size={}_household-size={}_prevalence={}.pdf'.format(pool_size, household_size, prevalence))
     plt.close()
     return
 
