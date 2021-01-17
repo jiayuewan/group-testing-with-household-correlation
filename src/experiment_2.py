@@ -34,13 +34,11 @@ def simulation_variable_household_size(population_size, params=NOMINAL_PARAMS, n
     for i in range(num_iters):
         infections = generate_correlated_infections(population_size, prevalence, type='real', household_dist=household_dist, SAR=SAR)
 
-        fnr_indep, eff_indep = one_stage_group_testing(infections, pool_size=6, LoD=174, type="real", shuffle=True)[:2]
-        fnr_correlated, eff_corr = one_stage_group_testing(infections, pool_size=6, LoD=174, type="real", shuffle=False)[:2]
-        #print(fnr_indep, fnr_correlated, eff_indep, eff_corr)
+        fnr_indep, eff_indep = one_stage_group_testing(infections, pool_size=pool_size, LoD=LoD, type="real", shuffle=True)[:2]
+        fnr_correlated, eff_corr = one_stage_group_testing(infections, pool_size=pool_size, LoD=LoD, type="real", shuffle=False)[:2]
         results[i, :] = [fnr_indep, fnr_correlated, eff_indep, eff_corr]
 
     return results
-
 
 
 def run_simulations_for_sensitivity_analysis():
@@ -50,11 +48,11 @@ def run_simulations_for_sensitivity_analysis():
     houshold_dists.remove('US')
 
     configs = {
-    'prevalence' :[0.001, 0.005, 0.05, 0.1],
-    'SAR' : [0.039, 0.154, 0.222, 0.446],
+    #'prevalence' :[0.001, 0.005, 0.05, 0.1],
+    #'SAR' : [0.039, 0.154, 0.222, 0.446],
     'pool size': [3, 12, 24],
     'FNR': [0.025, 0.1],
-    'household dist': houshold_dists
+    #'household dist': houshold_dists
     }
 
     results = simulation_variable_household_size(pop_size, params=NOMINAL_PARAMS, num_iters=num_iters)
@@ -89,5 +87,5 @@ def run_simulations_for_pareto_fontier():
 if __name__ == '__main__':
     run_simulations_for_sensitivity_analysis()
 
-    for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
-        generate_sensitivity_plots(param)
+    # for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
+    #     generate_sensitivity_plots(param)

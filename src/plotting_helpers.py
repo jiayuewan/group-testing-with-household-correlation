@@ -89,9 +89,9 @@ def generate_sensitivity_plots(param):
     df = pd.DataFrame({'indep FNR': fnr_indep, 'corr FNR': fnr_corr, 'indep efficiency': eff_indep,'corr efficiency': eff_corr}, index=index)
     df = df.sort_index()
     #print(df)
-    fig, axes = plt.subplots(2, 1)
-    df[['indep FNR', 'corr FNR']].plot.bar(ax = axes[0])
-    df[['indep efficiency', 'corr efficiency']].plot.bar(ax = axes[1])
+    fig, axes = plt.subplots(2, 1, sharex=True)
+    df[['indep FNR', 'corr FNR']].plot.bar(ax = axes[0], xlabel=param, ylabel='FNR')
+    df[['indep efficiency', 'corr efficiency']].plot.bar(ax = axes[1], xlabel=param, ylabel='efficiency')
     plt.savefig('../figs/experiment_2/sensitivity_plots/tmp_sensitivity_for_{}.pdf'.format(param))
     return
 
