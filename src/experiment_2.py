@@ -83,8 +83,8 @@ def run_simulations_for_pareto_fontier():
     pop_size = 12000
     num_iters = 500
 
-    prevalences = [0.001, 0.005, 0.05, 0.1]
-    pool_sizes = [2,3,4,6,8,10,12,15,18,21,24,27,30]
+    prevalences = [0.001, 0.005, 0.01, 0.05, 0.1]
+    pool_sizes = [3,4,6,8,10,12,15,20,24,30,40]
 
     for p in prevalences:
         for n in pool_sizes:
