@@ -34,10 +34,11 @@ def one_stage_group_testing_fixed_household_size(infections, pool_size, shuffle=
     num_positives = np.sum(pools)
     fnr_group_testing = num_false_negatives / num_positives
 
+    num_indiv_tests = num_positive_pools * pool_size
     total_num_tests = num_pools + num_positive_pools * pool_size
     efficiency = population_size / total_num_tests
 
-    return fnr_group_testing, efficiency, num_positives_in_pools
+    return fnr_group_testing, efficiency, num_indiv_tests
 
 
 def one_stage_group_testing(infections, pool_size, type='binary', LoD=None, shuffle=False):
