@@ -347,7 +347,7 @@ def generate_heatmap_plots():
     return
 
 
-def generate_resource_consumption_plots():
+def generate_resource_consumption_results():
     dir = '../results/experiment_2/pareto_analysis/'
 
     aggregate_results = {}
@@ -374,38 +374,38 @@ def generate_resource_consumption_plots():
     df_agg['sn (naive)'] = 1 - df_agg['fnr (naive)']
     df_agg['sn (correlated)'] = 1 - df_agg['fnr (correlated)']
 
+    df_results = pd.DataFrame(columns=['prevalence', 'opt pool size (naive)', 'opt sn * eff (naive)', 
+        'opt pool size (correlated)', 'opt sn * eff (correlated)', 'tests needed reduction'])
+
     for prev in df_agg['prevalence'].unique():
-        df = df_agg[df_agg['prevalence'] == prev]
-        ax = df.sort_values(by='pool size').plot(x='sn (naive)', y = 'eff (naive)', sort_columns=True, color='mediumpurple', marker='^', style='--')
-        df.sort_values(by='pool size').plot(x='sn (correlated)', y = 'eff (correlated)', sort_columns=True, ax=ax, color='mediumaquamarine', marker='o', style='-')
+        df = df_agg[df_agg['prevalence'] == prev].reset_index()
+        df['sn*eff (naive)'] = df['sn (naive)'] * df['eff (naive)']
+        df['sn*eff (correlated)'] = df['sn (correlated)'] * df['eff (correlated)']
 
-        texts = []
-        for i, point in df.iterrows():
-            texts.append(ax.text(point['sn (naive)'], point['eff (naive)'], str(int(point['pool size'])), color='dimgrey'))
-            texts.append(ax.text(point['sn (correlated)'], point['eff (correlated)'], str(int(point['pool size'])), color='dimgrey'))
 
-        adjust_text(texts, only_move={'points':'y', 'texts':'xy'})
+        opt_pool_size_naive = df['pool size'].iloc[df['sn*eff (naive)'].idxmax()]
+        opt_sn_eff_prod_naive = df['sn*eff (naive)'].max()
+        opt_pool_size_corr = df['pool size'].iloc[df['sn*eff (correlated)'].idxmax()]
+        opt_sn_eff_prod_corr = df['sn*eff (correlated)'].max()
 
-        plt.legend(['naive', 'correlated'])
-        plt.xlabel('Sensitivity = 1 - FNR')
-        plt.ylabel('Efficiency')
-        plt.title('Tradeoff between test efficiency and sensitivity\n under prevalence = {}'.format(prev))
-        plt.grid(True, ls=':')
-        plt.savefig('../figs/experiment_2/pareto_plots/pareto_for_prev_{}.pdf'.format(prev), format='pdf', dpi=600, bbox_inches='tight')
-        plt.close()
+        test_needed_reduction = opt_sn_eff_prod_corr / opt_sn_eff_prod_naive - 1
+        results = np.array([prev, opt_pool_size_naive, 
+            opt_sn_eff_prod_naive, opt_pool_size_corr, opt_sn_eff_prod_corr, test_needed_reduction]).round(3)
+        df_results = df_results.append(dict(zip(df_results.columns, results)), ignore_index=True)
+    
+    df_results.to_csv('../results/experiment_2/opt_pool_size_test_reduction.csv', index=False)
+
     return
-
-
 
 
 
 
 if __name__ == '__main__':
     # generate_heatmap_plots_for_exp_1()
-    plt.rcParams["font.family"] = 'serif'
+    # plt.rcParams["font.family"] = 'serif'
 
-    for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
-        generate_sensitivity_plots(param)
+    # for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
+    #     generate_sensitivity_plots(param)
 
     #generate_pareto_fontier_plots()
 
@@ -413,3 +413,4 @@ if __name__ == '__main__':
     # with open(filedir) as f:
     #     results = np.loadtxt(f)
     # plot_hist_exp_2(results, 'nominal')
+

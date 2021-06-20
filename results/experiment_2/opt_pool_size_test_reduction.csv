@@ -1,0 +1,6 @@
+prevalence,opt pool size (naive),opt sn * eff (naive),opt pool size (correlated),opt sn * eff (correlated),tests needed reduction
+0.001,40.0,13.607,40.0,16.124,0.185
+0.005,15.0,6.25,20.0,7.395,0.183
+0.01,12.0,4.531,12.0,5.297,0.169
+0.05,6.0,2.169,6.0,2.468,0.138
+0.1,4.0,1.588,4.0,1.734,0.092
