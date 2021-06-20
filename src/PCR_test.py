@@ -98,9 +98,45 @@ def calculate_FNR(LoD, sample_size=1000000):
     FNs = sample_size - sum(pooled_PCR_test(mu_list, individual=True, LoD=LoD))
     return FNs / sample_size
 
-if __name__ == '__main__':
-    print(pooled_PCR_test(np.array([0, 0, 0])))
-    print(pooled_PCR_test(np.array([100, 100, 1000])))
 
-    LoD = 174
-    print("population FNR corresponding to LoD = {} is {}".format(LoD, calculate_FNR(LoD)))
+def calculate_FNR_for_fixed_VL(LoD, mu, sample_size=1000000):
+    mu_list = np.ones(sample_size, dtype=int) * int(10 ** mu)
+    FNs = sample_size - sum(pooled_PCR_test(mu_list, individual=True, LoD=LoD))
+    return FNs / sample_size
+    # LoD = 174
+    # mu = 3.5 -> 89.7% (VL = 3162)
+    # mu = 3.55 -> 38.5%
+    # mu = 3.594 -> 4.6%
+    # mu = 3.65 -> 0.02% (VL = 4467)
+
+
+def compute_bound_in_theorem_2(num_positives=2, pool_size=2, n_iters=100000):
+    count_Y_1_SD_0 = 0
+    count_Y_1_SD_1 = 0
+
+    for _ in range(n_iters):
+        viral_loads = np.array([10 ** x for x in sample_log10_viral_loads(n_samples=num_positives)] + [0] * (pool_size - num_positives)).astype(int)
+        S_D = sum(pooled_PCR_test(viral_loads, individual=True))
+        Y = pooled_PCR_test(viral_loads, individual=False)
+        if Y == 1 and S_D == 0:
+            count_Y_1_SD_0 += 1
+
+        elif Y == 1 and S_D > 0:
+            count_Y_1_SD_1 += 1
+
+    return (count_Y_1_SD_0, count_Y_1_SD_1, count_Y_1_SD_0/count_Y_1_SD_1)
+
+
+if __name__ == '__main__':
+    # print(calculate_FNR_for_fixed_VL(174, 3.45))
+    # print(pooled_PCR_test(np.array([0, 0, 0])))
+    # print(pooled_PCR_test(np.array([100, 100, 1000])))
+    print(compute_bound_in_theorem_2(1, 2))
+    # for n in [2, 6, 12]:
+    #     print(n, compute_bound_in_theorem_2(n, n))
+    #     ratios = np.zeros(n - 1)
+    #
+    #     for k in range(1, n):
+    #         ratios[k-1] = compute_bound_in_theorem_2(k, n)[2]
+    #
+    #     print("for pool size = {0}, the ratios for k from 1 to {0} are {1}".format(n, ratios))

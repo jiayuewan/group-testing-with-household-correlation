@@ -36,5 +36,10 @@ def plot_log10_VL_pdf(params=GMM_PARAMS):
 
 
 if __name__ == '__main__':
-    print(sample_log10_viral_loads(10))
-    plot_log10_VL_pdf()
+    # print(sample_log10_viral_loads(10))
+    # plot_log10_VL_pdf()
+
+    sample_size = 100000
+    mus = np.array(sample_log10_viral_loads(n_samples=sample_size))
+    print(len(mus[np.logical_and(mus < 3.65, mus > 3.5)]) / sample_size) #2.3%
+    print(len(mus[np.logical_and(mus < 3.65, mus > 3.45)]) / sample_size)  #2.8%
