@@ -271,7 +271,6 @@ def generate_pareto_fontier_plots():
 
 
 def generate_heatmap_plots():
-
     dir = '../results/experiment_2/pareto_analysis/'
 
     aggregate_results = {}
@@ -347,7 +346,7 @@ def generate_heatmap_plots():
     return
 
 
-def generate_resource_consumption_results():
+def generate_test_consumption_results():
     dir = '../results/experiment_2/pareto_analysis/'
 
     aggregate_results = {}
@@ -374,7 +373,7 @@ def generate_resource_consumption_results():
     df_agg['sn (naive)'] = 1 - df_agg['fnr (naive)']
     df_agg['sn (correlated)'] = 1 - df_agg['fnr (correlated)']
 
-    df_results = pd.DataFrame(columns=['prevalence', 'opt pool size (naive)', 'opt sn * eff (naive)', 
+    df_results = pd.DataFrame(columns=['prevalence', 'opt pool size (naive)', 'opt sn * eff (naive)',
         'opt pool size (correlated)', 'opt sn * eff (correlated)', 'tests needed reduction'])
 
     for prev in df_agg['prevalence'].unique():
@@ -389,28 +388,27 @@ def generate_resource_consumption_results():
         opt_sn_eff_prod_corr = df['sn*eff (correlated)'].max()
 
         test_needed_reduction = opt_sn_eff_prod_corr / opt_sn_eff_prod_naive - 1
-        results = np.array([prev, opt_pool_size_naive, 
+        results = np.array([prev, opt_pool_size_naive,
             opt_sn_eff_prod_naive, opt_pool_size_corr, opt_sn_eff_prod_corr, test_needed_reduction]).round(3)
         df_results = df_results.append(dict(zip(df_results.columns, results)), ignore_index=True)
-    
-    df_results.to_csv('../results/experiment_2/opt_pool_size_test_reduction.csv', index=False)
 
+    df_results.to_csv('../results/experiment_2/opt_pool_size_test_reduction.csv', index=False)
     return
 
 
-
-
 if __name__ == '__main__':
-    # generate_heatmap_plots_for_exp_1()
-    # plt.rcParams["font.family"] = 'serif'
+    plt.rcParams["font.family"] = 'serif'
 
-    # for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
-    #     generate_sensitivity_plots(param)
+    filedir = "../results/experiment_2/sensitivity_analysis/results_prevalence=0.01_SAR=0.188_pool size=6_FNR=0.05_household dist=US.data"
+    with open(filedir) as f:
+        results = np.loadtxt(f)
+    plot_hist_exp_2(results, 'nominal')
 
-    #generate_pareto_fontier_plots()
+    for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
+        generate_sensitivity_plots(param)
 
-    # filedir = "../results/experiment_2/sensitivity_analysis/results_prevalence=0.01_SAR=0.188_pool size=6_FNR=0.05_household dist=US.data"
-    # with open(filedir) as f:
-    #     results = np.loadtxt(f)
-    # plot_hist_exp_2(results, 'nominal')
+    generate_pareto_fontier_plots()
 
+    generate_heatmap_plots()
+
+    generate_test_consumption_results()
