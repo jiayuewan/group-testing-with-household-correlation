@@ -1,1 +1,1 @@
-This is th repository for correlated group testing.
+This is the repository for correlated group testing.

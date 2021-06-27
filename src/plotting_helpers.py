@@ -381,13 +381,15 @@ def generate_test_consumption_results():
         df['sn*eff (naive)'] = df['sn (naive)'] * df['eff (naive)']
         df['sn*eff (correlated)'] = df['sn (correlated)'] * df['eff (correlated)']
 
-
         opt_pool_size_naive = df['pool size'].iloc[df['sn*eff (naive)'].idxmax()]
         opt_sn_eff_prod_naive = df['sn*eff (naive)'].max()
         opt_pool_size_corr = df['pool size'].iloc[df['sn*eff (correlated)'].idxmax()]
         opt_sn_eff_prod_corr = df['sn*eff (correlated)'].max()
 
-        test_needed_reduction = opt_sn_eff_prod_corr / opt_sn_eff_prod_naive - 1
+        test_needed_reduction = 1 - opt_sn_eff_prod_naive / opt_sn_eff_prod_corr
+        # (1 / naive - 1 / corr) / (1 / corr) = corr / naive - 1 # increase when using NP
+        # (1 / naive - 1 / corr) / (1 / naive) = 1 - naive/corr # reduction when using CP
+
         results = np.array([prev, opt_pool_size_naive,
             opt_sn_eff_prod_naive, opt_pool_size_corr, opt_sn_eff_prod_corr, test_needed_reduction]).round(3)
         df_results = df_results.append(dict(zip(df_results.columns, results)), ignore_index=True)
@@ -397,18 +399,18 @@ def generate_test_consumption_results():
 
 
 if __name__ == '__main__':
-    plt.rcParams["font.family"] = 'serif'
-
-    filedir = "../results/experiment_2/sensitivity_analysis/results_prevalence=0.01_SAR=0.188_pool size=6_FNR=0.05_household dist=US.data"
-    with open(filedir) as f:
-        results = np.loadtxt(f)
-    plot_hist_exp_2(results, 'nominal')
-
-    for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
-        generate_sensitivity_plots(param)
-
-    generate_pareto_fontier_plots()
-
-    generate_heatmap_plots()
+    # plt.rcParams["font.family"] = 'serif'
+    #
+    # filedir = "../results/experiment_2/sensitivity_analysis/results_prevalence=0.01_SAR=0.188_pool size=6_FNR=0.05_household dist=US.data"
+    # with open(filedir) as f:
+    #     results = np.loadtxt(f)
+    # plot_hist_exp_2(results, 'nominal')
+    #
+    # for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
+    #     generate_sensitivity_plots(param)
+    #
+    # generate_pareto_fontier_plots()
+    #
+    # generate_heatmap_plots()
 
     generate_test_consumption_results()
