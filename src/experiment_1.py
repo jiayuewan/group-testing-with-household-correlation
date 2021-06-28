@@ -48,8 +48,6 @@ def main():
     #     pickle.dump(fnr_corr_results, f)
 
 
-
-
 if __name__ == '__main__':
     #main()
 
