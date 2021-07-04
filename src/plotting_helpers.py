@@ -344,8 +344,7 @@ def generate_heatmap_plots():
     fig.savefig('../figs/experiment_2/pareto_plots/heapmap_for_fnr_and_eff.pdf', format='pdf', dpi=600, bbox_inches='tight')
     plt.clf()
     return
-
-
+    
 def generate_test_consumption_results():
     dir = '../results/experiment_2/pareto_analysis/'
 

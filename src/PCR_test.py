@@ -1,6 +1,6 @@
 import numpy as np
 from viral_load_distribution import sample_log10_viral_loads
-
+import matplotlib.pyplot as plt 
 
 PCR_PARAMS = {'V_sample': 1, 'c_1': 1/10, 'gamma': 1/2, 'c_2': 1}
 PCR_LOD = 100
@@ -85,10 +85,10 @@ def eval_FNR(mu, params=PCR_PARAMS, n_iters=1000):
     Output: expected false negative rate"""
 
     detected = 0
-    for j in range(n_iter):
+    for j in range(n_iters):
         detected += pooled_PCR_test(mu, params)
 
-    return 1 - detected / n_iter
+    return 1 - detected / n_iters
 
 
 # typically takes ~ 1 minute to run
@@ -108,6 +108,19 @@ def calculate_FNR_for_fixed_VL(LoD, mu, sample_size=1000000):
     # mu = 3.55 -> 38.5%
     # mu = 3.594 -> 4.6%
     # mu = 3.65 -> 0.02% (VL = 4467)
+
+
+def generate_indiv_test_sensitivity_curve():
+    mus = np.linspace(3, 4, 100)
+    Sns = [1 - calculate_FNR_for_fixed_VL(174, mu) for mu in mus]
+
+    #plt.figure(figsize=(6,4))
+    plt.plot(mus, Sns)
+    plt.xlabel(r"$\log_{10} VL$ (copies/mL)")
+    plt.ylabel("sensitivity")
+    plt.title(r"Individual test sensitvity vs. $\log_{10}$ viral load under LoD$=174$")
+    plt.savefig('../figs/individual_test_sensitivity.pdf')
+    plt.close()
 
 
 def compute_bound_in_theorem_2(num_positives=2, pool_size=2, n_iters=100000):
@@ -131,7 +144,7 @@ if __name__ == '__main__':
     # print(calculate_FNR_for_fixed_VL(174, 3.45))
     # print(pooled_PCR_test(np.array([0, 0, 0])))
     # print(pooled_PCR_test(np.array([100, 100, 1000])))
-    print(compute_bound_in_theorem_2(1, 2))
+    # print(compute_bound_in_theorem_2(1, 2))
     # for n in [2, 6, 12]:
     #     print(n, compute_bound_in_theorem_2(n, n))
     #     ratios = np.zeros(n - 1)
@@ -140,3 +153,5 @@ if __name__ == '__main__':
     #         ratios[k-1] = compute_bound_in_theorem_2(k, n)[2]
     #
     #     print("for pool size = {0}, the ratios for k from 1 to {0} are {1}".format(n, ratios))
+    plt.rcParams["font.family"] = 'serif'
+    generate_indiv_test_sensitivity_curve()
