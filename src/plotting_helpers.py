@@ -117,7 +117,9 @@ def plot_hist_exp_2(results, param, val=None):
     fnr_correlated = results[:, 1]
     eff_indep = results[:, 2]
     eff_correlated = results[:, 3]
-
+    # print Sn (naive), Sn (correlated), Eff (naive), Eff (correlated)
+    print(1 - np.mean(fnr_indep), 1 - np.mean(fnr_correlated), np.mean(eff_indep), np.mean(eff_correlated))
+   
     ax1 = plt.subplot(111)
 
     n, bins, patches = ax1.hist(results[:, :2], label=['naive', 'correlated'], color=['mediumaquamarine', 'mediumpurple'])
@@ -189,11 +191,14 @@ def generate_sensitivity_plots(param):
     df = pd.DataFrame({'FNR (naive)': fnr_indep, 'FNR (correlated)': fnr_corr, 'efficiency (naive)': eff_indep,'efficiency (correlated)': eff_corr}, index=index)
     df = df.sort_index()
     df = df.rename_axis(param).reset_index()
+    df['sensitivity (naive)'] = 1 - df['FNR (naive)']
+    df['sensitivity (correlated)'] = 1 - df['FNR (correlated)']
 
     fig, ax = plt.subplots()
     ax2 = ax.twinx()
 
-    fnrs = df[['FNR (naive)', 'FNR (correlated)']].plot.bar(ax=ax, legend=False, color=['mediumaquamarine', 'mediumpurple'], alpha=1)
+    #fnrs = df[['FNR (naive)', 'FNR (correlated)']].plot.bar(ax=ax, legend=False, color=['mediumaquamarine', 'mediumpurple'], alpha=1)
+    sns = df[['sensitivity (naive)', 'sensitivity (correlated)']].plot.bar(ax=ax, legend=False, color=['mediumaquamarine', 'mediumpurple'], alpha=1)
     l = df.shape[0]
 
     bars = ax.patches
@@ -209,14 +214,15 @@ def generate_sensitivity_plots(param):
                 color=['mediumpurple'], path_effects=[pe.Stroke(linewidth=3, foreground='w'), pe.Normal()])
 
     ax.set_xticklabels(df[param])
-    ax.set_ylabel('FNR')
+    ax.set_ylabel('sensitivity')
+    ax.set_ylim(0.7) 
     ax2.set_ylabel('efficiency')
     ax2.set_ylim(1) if param in ['prevalence', 'pool size'] else ax2.set_ylim(4.5)
     ax.set_xlabel(param) if param != 'FNR' else ax.set_xlabel('individual testing average FNR')
     h, l = ax.get_legend_handles_labels()
     h2, l2 = ax2.get_legend_handles_labels()
     ax.legend(h + h2, l + l2, loc='lower left', bbox_to_anchor=(0, 1.02, 0.6, 1.02), ncol=2)
-    fig.savefig('../figs/experiment_2/sensitivity_plots/tmp_sensitivity_for_{}_alternative.pdf'.format(param), bbox_inches='tight', dpi=600)
+    fig.savefig('../figs/experiment_2/sensitivity_plots/sensitivity_for_{}_new.pdf'.format(param), bbox_inches='tight', dpi=600)
     plt.clf()
     return
 
@@ -398,18 +404,18 @@ def generate_test_consumption_results():
 
 
 if __name__ == '__main__':
-    # plt.rcParams["font.family"] = 'serif'
-    #
+    plt.rcParams["font.family"] = 'serif'
+    
     # filedir = "../results/experiment_2/sensitivity_analysis/results_prevalence=0.01_SAR=0.188_pool size=6_FNR=0.05_household dist=US.data"
     # with open(filedir) as f:
     #     results = np.loadtxt(f)
     # plot_hist_exp_2(results, 'nominal')
     #
-    # for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
-    #     generate_sensitivity_plots(param)
+    for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
+        generate_sensitivity_plots(param)
     #
     # generate_pareto_fontier_plots()
     #
     # generate_heatmap_plots()
 
-    generate_test_consumption_results()
+    #generate_test_consumption_results()
