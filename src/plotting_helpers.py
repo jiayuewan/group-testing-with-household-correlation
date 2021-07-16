@@ -119,7 +119,7 @@ def plot_hist_exp_2(results, param, val=None):
     eff_correlated = results[:, 3]
     # print Sn (naive), Sn (correlated), Eff (naive), Eff (correlated)
     print(1 - np.mean(fnr_indep), 1 - np.mean(fnr_correlated), np.mean(eff_indep), np.mean(eff_correlated))
-   
+    print(np.std(fnr_indep)/np.sqrt(500), np.std(fnr_correlated)/np.sqrt(500), np.std(eff_indep)/np.sqrt(500), np.std(eff_correlated)/np.sqrt(500))
     ax1 = plt.subplot(111)
 
     n, bins, patches = ax1.hist(results[:, :2], label=['naive', 'correlated'], color=['mediumaquamarine', 'mediumpurple'])
@@ -406,13 +406,13 @@ def generate_test_consumption_results():
 if __name__ == '__main__':
     plt.rcParams["font.family"] = 'serif'
     
-    # filedir = "../results/experiment_2/sensitivity_analysis/results_prevalence=0.01_SAR=0.188_pool size=6_FNR=0.05_household dist=US.data"
-    # with open(filedir) as f:
-    #     results = np.loadtxt(f)
-    # plot_hist_exp_2(results, 'nominal')
+    filedir = "../results/experiment_2/sensitivity_analysis/results_prevalence=0.01_SAR=0.188_pool size=6_FNR=0.05_household dist=US.data"
+    with open(filedir) as f:
+        results = np.loadtxt(f)
+    plot_hist_exp_2(results, 'nominal')
     #
-    for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
-        generate_sensitivity_plots(param)
+    # for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
+    #     generate_sensitivity_plots(param)
     #
     # generate_pareto_fontier_plots()
     #

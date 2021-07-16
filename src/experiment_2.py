@@ -43,7 +43,7 @@ def simulation_variable_household_size(population_size, params=NOMINAL_PARAMS, n
 
 def run_simulations_for_sensitivity_analysis():
     pop_size = 12000
-    num_iters = 500
+    num_iters = 2000
     houshold_dists = list(HOUSEHOLD_DIST.keys())
     houshold_dists.remove('US')
 
@@ -59,23 +59,23 @@ def run_simulations_for_sensitivity_analysis():
     plot_hist_exp_2(results, "nominal")
     avgs = np.mean(results, axis=0)
     print('indep fnr = {}, corr fnr = {}, indep eff = {}, corr eff = {}'.format(avgs[0], avgs[1], avgs[2], avgs[3]))
-    nominal_filedir = '../results/experiment_2/sensitivity_analysis/results_prevalence={}_SAR={}_pool size={}_FNR={}_household dist={}.data'.format(\
-        NOMINAL_PARAMS['prevalence'], NOMINAL_PARAMS['SAR'], NOMINAL_PARAMS['pool size'], NOMINAL_PARAMS['FNR'], NOMINAL_PARAMS['household dist'])
+    nominal_filedir = '../results/experiment_2/sensitivity_analysis/results_prevalence={}_SAR={}_pool size={}_FNR={}_household dist={}_niters={}.data'.format(\
+        NOMINAL_PARAMS['prevalence'], NOMINAL_PARAMS['SAR'], NOMINAL_PARAMS['pool size'], NOMINAL_PARAMS['FNR'], NOMINAL_PARAMS['household dist'], num_iters)
     with open(nominal_filedir, 'wb') as f:
         np.savetxt(f, results)
 
-    for param, values in configs.items():
-        for val in values:
-            params = NOMINAL_PARAMS.copy()
-            params[param] = val
+    # for param, values in configs.items():
+    #     for val in values:
+    #         params = NOMINAL_PARAMS.copy()
+    #         params[param] = val
 
-            results = simulation_variable_household_size(pop_size, params=params, num_iters=num_iters)
-            plot_hist_exp_2(results, param, val)
-            avgs = np.mean(results, axis=0)
-            print('indep fnr = {}, corr fnr = {}, indep eff = {}, corr eff = {}'.format(avgs[0], avgs[1], avgs[2], avgs[3]))
+    #         results = simulation_variable_household_size(pop_size, params=params, num_iters=num_iters)
+    #         plot_hist_exp_2(results, param, val)
+    #         avgs = np.mean(results, axis=0)
+    #         print('indep fnr = {}, corr fnr = {}, indep eff = {}, corr eff = {}'.format(avgs[0], avgs[1], avgs[2], avgs[3]))
 
-            with open('../results/experiment_2/sensitivity_analysis/results_{}={}.data'.format(param, val), 'wb') as f:
-                np.savetxt(f, results)
+    #         with open('../results/experiment_2/sensitivity_analysis/results_{}={}.data'.format(param, val), 'wb') as f:
+    #             np.savetxt(f, results)
     return
 
 
@@ -103,7 +103,7 @@ def run_simulations_for_pareto_fontier():
 
 
 if __name__ == '__main__':
-    #run_simulations_for_sensitivity_analysis()
-    run_simulations_for_pareto_fontier()
+    run_simulations_for_sensitivity_analysis()
+    #run_simulations_for_pareto_fontier()
     # for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
     #     generate_sensitivity_plots(param)
