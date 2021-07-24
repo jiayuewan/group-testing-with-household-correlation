@@ -117,9 +117,10 @@ def plot_hist_exp_2(results, param, val=None):
     fnr_correlated = results[:, 1]
     eff_indep = results[:, 2]
     eff_correlated = results[:, 3]
+    n_iters = results.shape[0]
     # print Sn (naive), Sn (correlated), Eff (naive), Eff (correlated)
     print(1 - np.mean(fnr_indep), 1 - np.mean(fnr_correlated), np.mean(eff_indep), np.mean(eff_correlated))
-    print(np.std(fnr_indep)/np.sqrt(500), np.std(fnr_correlated)/np.sqrt(500), np.std(eff_indep)/np.sqrt(500), np.std(eff_correlated)/np.sqrt(500))
+    print(np.std(fnr_indep)/np.sqrt(n_iters), np.std(fnr_correlated)/np.sqrt(n_iters), np.std(eff_indep)/np.sqrt(n_iters), np.std(eff_correlated)/np.sqrt(n_iters))
     ax1 = plt.subplot(111)
 
     n, bins, patches = ax1.hist(results[:, :2], label=['naive', 'correlated'], color=['mediumaquamarine', 'mediumpurple'])
