@@ -1,0 +1,2 @@
+/home/jw2529/group-testing-with-household-correlation/src/one_stage_hierarchical_group_testing.py:120: RuntimeWarning: invalid value encountered in long_scalars
+  fnr_group_testing = num_false_negatives / num_positives
