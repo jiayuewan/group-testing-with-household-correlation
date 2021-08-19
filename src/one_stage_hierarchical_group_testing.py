@@ -92,7 +92,7 @@ def one_stage_group_testing(infections, pool_size, type='binary', LoD=None, shuf
         results = np.array([st.bernoulli.rvs(1 - false_negative_rate_binary(n)) if n >= 1 else 0 for n in num_positives_in_pools])
         num_false_negatives = np.sum(pools - results.reshape((-1,1)) == 1)
         num_positives = np.sum(pools)
-        fnr_group_testing = num_false_negatives / num_positives
+        fnr_group_testing = num_false_negatives / num_positives if num_positives > 0 else 0.0
         return fnr_group_testing, num_positives_in_pools
 
     else:
@@ -117,7 +117,7 @@ def one_stage_group_testing(infections, pool_size, type='binary', LoD=None, shuf
         expected_outcomes = pools > 0
         num_false_negatives = np.sum(expected_outcomes - final_results == 1)
         num_positives = np.sum(expected_outcomes)
-        fnr_group_testing = num_false_negatives / num_positives
+        fnr_group_testing = num_false_negatives / num_positives if num_positives > 0 else 0.0
         total_num_tests = num_pools + num_positive_pools * pool_size
         num_positives_in_pools = np.sum(pools > 0, axis=1)
         efficiency = population_size / total_num_tests

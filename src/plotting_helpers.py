@@ -239,7 +239,7 @@ def generate_sensitivity_plots(param):
 
 
 def generate_pareto_fontier_plots():
-    dir = '../results/experiment_2/pareto_analysis/'
+    dir = '../results/experiment_2/pareto_analysis_2000/'
 
     aggregate_results = {}
 
@@ -314,12 +314,12 @@ def generate_heatmap_plots():
     df_agg['sn (naive)'] = 1 - df_agg['fnr (naive)']
     df_agg['sn (correlated)'] = 1 - df_agg['fnr (correlated)']
 
-    df_agg['sn diff'] = df_agg['sn (correlated)'] - df_agg['sn (naive)']
+    df_agg['sn diff'] = (df_agg['sn (correlated)'] - df_agg['sn (naive)']) * 100
     df_agg['eff diff'] = df_agg['eff (correlated)'] - df_agg['eff (naive)']
 
     fig, [ax0, ax1] = plt.subplots(1, 2, figsize=(8, 4))
     table_sn = pd.pivot_table(df_agg, values='sn diff', index=['prevalence'], columns=['pool size'])
-    print(table_sn)
+    # print(table_sn) 
     heatmap = ax0.pcolor(table_sn, cmap=cm.BuPu)
     ax0.set_aspect('equal')
     ax0.set_yticks(np.arange(0.5, len(table_sn.index), 1))
@@ -328,14 +328,14 @@ def generate_heatmap_plots():
     ax0.set_xticklabels(table_sn.columns)
     ax0.set_xlabel('pool size')
     ax0.set_ylabel('prevalence')
-    ax0.set_title('Difference in sensitivity')
-    fig.colorbar(heatmap, ax=ax0, orientation="horizontal")
+    ax0.set_title('Difference in sensitivity (%)')
+    fig.colorbar(heatmap, ax=ax0, orientation="horizontal", label="(%)")
 
     textcolors = ["k", "w"]
-    threshold = 0.056
+    threshold = 0.056 * 100
     for i, prev in enumerate(table_sn.index):
         for j, pool_size in enumerate(table_sn.columns):
-            text = ax0.text(j+0.5, i+0.5, "{:.3f}".format(table_sn.iloc[i,j]).replace("0.", "."), \
+            text = ax0.text(j+0.5, i+0.5, "{:.1f}".format(table_sn.iloc[i,j]),
                 ha="center", va="center", color=textcolors[table_sn.iloc[i, j] > threshold], size=7)
 
     table_eff = pd.pivot_table(df_agg, values='eff diff', index=['prevalence'], columns=['pool size'])
@@ -354,7 +354,7 @@ def generate_heatmap_plots():
     threshold = 0.8
     for i, prev in enumerate(table_eff.index):
         for j, pool_size in enumerate(table_eff.columns):
-            text = ax1.text(j+0.5, i+0.5, "{:.3f}".format(table_eff.iloc[i,j]).replace("0.", "."), \
+            text = ax1.text(j+0.5, i+0.5, "{:.2f}".format(table_eff.iloc[i,j]).replace("0.", "."), \
                 ha="center", va="center", color=textcolors[table_eff.iloc[i, j] > threshold], size=7)
 
     fig.tight_layout()
@@ -362,8 +362,9 @@ def generate_heatmap_plots():
     plt.clf()
     return
     
+
 def generate_test_consumption_results():
-    dir = '../results/experiment_2/pareto_analysis/'
+    dir = '../results/experiment_2/pareto_analysis_2000/'
 
     aggregate_results = {}
 
@@ -417,21 +418,22 @@ def generate_test_consumption_results():
 if __name__ == '__main__':
     plt.rcParams["font.family"] = 'serif'
     
-    # filedir = "../results/experiment_2/sensitivity_analysis_2000/results_prevalence=0.01_SAR=0.188_pool size=6_FNR=0.05_household dist=US.data"
-    # with open(filedir) as f:
-    #     results = np.loadtxt(f)
-
-    # # avgs = np.mean(results, axis=0)
+    filedir = "../results/experiment_2/sensitivity_analysis_2000/results_prevalence=0.01_SAR=0.188_pool size=6_FNR=0.05_household dist=US.data"
+    with open(filedir) as f:
+        results = np.loadtxt(f)
     
-    # # Table 7 results
-    # plot_hist_exp_2(results, 'nominal')
+    # Table 7 results
+    plot_hist_exp_2(results, 'nominal')
 
-    #
+    # Figure 2 results
     for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
         generate_sensitivity_plots(param)
-    #
-    # generate_pareto_fontier_plots()
-    #
-    # generate_heatmap_plots()
+    
+    # Figure 3 results
+    generate_pareto_fontier_plots()
+    
+    # Figure 4 results
+    generate_heatmap_plots()
 
-    #generate_test_consumption_results()
+    # Table 8 results
+    generate_test_consumption_results()
