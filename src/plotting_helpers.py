@@ -118,8 +118,19 @@ def plot_hist_exp_2(results, param, val=None):
     eff_indep = results[:, 2]
     eff_correlated = results[:, 3]
     # print Sn (naive), Sn (correlated), Eff (naive), Eff (correlated)
-    print(1 - np.mean(fnr_indep), 1 - np.mean(fnr_correlated), np.mean(eff_indep), np.mean(eff_correlated))
-    print(np.std(fnr_indep)/np.sqrt(500), np.std(fnr_correlated)/np.sqrt(500), np.std(eff_indep)/np.sqrt(500), np.std(eff_correlated)/np.sqrt(500))
+    num_iters = results.shape[0]
+
+    f = open("../results/experiment_2/nominal_scenario_results.txt", "w")
+    f.write(f"sensitivity: {1 - np.mean(fnr_indep):.1%} (naive), {1 - np.mean(fnr_correlated):.1%} (correlated);\
+        efficiency: {np.mean(eff_indep):.2f} (naive), {np.mean(eff_correlated):.2f} (correlated)\n")
+    f.write(f"standard error: {np.std(fnr_indep)/np.sqrt(num_iters)}, {np.std(fnr_correlated)/np.sqrt(num_iters)}, \
+        {np.std(eff_indep)/np.sqrt(num_iters)}, {np.std(eff_correlated)/np.sqrt(num_iters)}\n")
+    # print("sensitivity and efficiency:", 1 - np.mean(fnr_indep), 1 - np.mean(fnr_correlated), np.mean(eff_indep), np.mean(eff_correlated))
+    # print("standard error: ", np.std(fnr_indep)/np.sqrt(num_iters), np.std(fnr_correlated)/np.sqrt(num_iters), np.std(eff_indep)/np.sqrt(num_iters), np.std(eff_correlated)/np.sqrt(num_iters))
+    f.write(f"improvement: {(1 - np.mean(fnr_correlated)) / (1 - np.mean(fnr_indep))-1:.2%} (sensitivity); \
+        {np.mean(eff_correlated) / np.mean(eff_indep)-1:.2%} (efficiency)\n")
+    f.close()
+
     ax1 = plt.subplot(111)
 
     n, bins, patches = ax1.hist(results[:, :2], label=['naive', 'correlated'], color=['mediumaquamarine', 'mediumpurple'])
@@ -163,7 +174,7 @@ def plot_hist_exp_2(results, param, val=None):
 
 
 def generate_sensitivity_plots(param):
-    dir = '../results/experiment_2/sensitivity_analysis/'
+    dir = '../results/experiment_2/sensitivity_analysis_2000/'
 
     fnr_indep = []
     fnr_corr = []
@@ -406,20 +417,21 @@ def generate_test_consumption_results():
 if __name__ == '__main__':
     plt.rcParams["font.family"] = 'serif'
     
-    # filedir = "../results/experiment_2/sensitivity_analysis/results_prevalence=0.01_SAR=0.188_pool size=6_FNR=0.05_household dist=US_niters=2000.data"
+    # filedir = "../results/experiment_2/sensitivity_analysis_2000/results_prevalence=0.01_SAR=0.188_pool size=6_FNR=0.05_household dist=US.data"
     # with open(filedir) as f:
     #     results = np.loadtxt(f)
 
-    # avgs = np.mean(results, axis=0)
-    # print('indep fnr = {}, corr fnr = {}, indep eff = {}, corr eff = {}'.format(avgs[0], avgs[1], avgs[2], avgs[3]))
+    # # avgs = np.mean(results, axis=0)
     
+    # # Table 7 results
     # plot_hist_exp_2(results, 'nominal')
+
     #
-    # for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
-    #     generate_sensitivity_plots(param)
+    for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
+        generate_sensitivity_plots(param)
     #
     # generate_pareto_fontier_plots()
     #
-    generate_heatmap_plots()
+    # generate_heatmap_plots()
 
     #generate_test_consumption_results()
