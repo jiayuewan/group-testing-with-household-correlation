@@ -392,7 +392,7 @@ def generate_test_consumption_results():
 
     df_results = pd.DataFrame(columns=['prevalence', 'opt pool size (naive)', 'opt sn * eff (naive)',
         'opt pool size (correlated)', 'opt sn * eff (correlated)', 'tests needed reduction'])
-
+    
     for prev in df_agg['prevalence'].unique():
         df = df_agg[df_agg['prevalence'] == prev].reset_index()
         df['sn*eff (naive)'] = df['sn (naive)'] * df['eff (naive)']
@@ -402,11 +402,17 @@ def generate_test_consumption_results():
         opt_sn_eff_prod_naive = df['sn*eff (naive)'].max()
         opt_pool_size_corr = df['pool size'].iloc[df['sn*eff (correlated)'].idxmax()]
         opt_sn_eff_prod_corr = df['sn*eff (correlated)'].max()
+        
+        if prev == 0.01:
+            print('naive:', df[['prevalence', 'pool size', 'sn (naive)', 'eff (naive)']]\
+                [(df['pool size'] == opt_pool_size_naive)]) 
+            print('correlated: ', df[['prevalence', 'pool size', 'sn (correlated)', 'eff (correlated)']]\
+                [(df['pool size'] == opt_pool_size_corr)]) 
 
         test_needed_reduction = 1 - opt_sn_eff_prod_naive / opt_sn_eff_prod_corr
         # (1 / naive - 1 / corr) / (1 / corr) = corr / naive - 1 # increase when using NP
         # (1 / naive - 1 / corr) / (1 / naive) = 1 - naive/corr # reduction when using CP
-
+        
         results = np.array([prev, opt_pool_size_naive,
             opt_sn_eff_prod_naive, opt_pool_size_corr, opt_sn_eff_prod_corr, test_needed_reduction]).round(3)
         df_results = df_results.append(dict(zip(df_results.columns, results)), ignore_index=True)
