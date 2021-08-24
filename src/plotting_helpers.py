@@ -120,7 +120,7 @@ def plot_hist_exp_2(results, param, val=None):
     # print Sn (naive), Sn (correlated), Eff (naive), Eff (correlated)
     num_iters = results.shape[0]
 
-    f = open("../results/experiment_2/nominal_scenario_results.txt", "w")
+    f = open(f"../results/experiment_2/nominal_scenario_results_{num_iters}.txt", "w")
     f.write(f"sensitivity: {1 - np.mean(fnr_indep):.1%} (naive), {1 - np.mean(fnr_correlated):.1%} (correlated);\
         efficiency: {np.mean(eff_indep):.2f} (naive), {np.mean(eff_correlated):.2f} (correlated)\n")
     f.write(f"standard error: {np.std(fnr_indep)/np.sqrt(num_iters)}, {np.std(fnr_correlated)/np.sqrt(num_iters)}, \
@@ -417,14 +417,14 @@ def generate_test_consumption_results():
             opt_sn_eff_prod_naive, opt_pool_size_corr, opt_sn_eff_prod_corr, test_needed_reduction]).round(3)
         df_results = df_results.append(dict(zip(df_results.columns, results)), ignore_index=True)
 
-    df_results.to_csv('../results/experiment_2/opt_pool_size_test_reduction.csv', index=False)
+    df_results.to_csv('../results/experiment_2/opt_pool_size_test_reduction_2000.csv', index=False)
     return
 
 
 if __name__ == '__main__':
     plt.rcParams["font.family"] = 'serif'
     
-    filedir = "../results/experiment_2/sensitivity_analysis_2000/results_prevalence=0.01_SAR=0.188_pool size=6_FNR=0.05_household dist=US.data"
+    filedir = "../results/experiment_2/sensitivity_analysis_2000/results_prevalence=0.01_SAR=0.166_pool size=6_FNR=0.05_household dist=US.data"
     with open(filedir) as f:
         results = np.loadtxt(f)
     

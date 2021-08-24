@@ -1,0 +1,4 @@
+plotting_helpers.py:339: DeprecationWarning: In future, it will be an error for 'np.bool_' scalars to be interpreted as an index
+  ha="center", va="center", color=textcolors[table_sn.iloc[i, j] > threshold], size=7)
+plotting_helpers.py:358: DeprecationWarning: In future, it will be an error for 'np.bool_' scalars to be interpreted as an index
+  ha="center", va="center", color=textcolors[table_eff.iloc[i, j] > threshold], size=7)

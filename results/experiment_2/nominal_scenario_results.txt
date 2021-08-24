@@ -1,3 +1,0 @@
-sensitivity: 81.9% (naive), 86.4% (correlated);        efficiency: 4.67 (naive), 4.85 (correlated)
-standard error: 0.0007896620715114905, 0.0007376204098456218,         0.002751483033291055, 0.00229395177118664
-improvement: 5.42% (sensitivity);         3.94% (efficiency)

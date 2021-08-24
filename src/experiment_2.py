@@ -14,7 +14,7 @@ NOMINAL_PARAMS = {
 "pool size": 6,
 "prevalence": 0.01,
 "household dist": 'US',
-"SAR": 0.188,
+"SAR": 0.166,
 "FNR": 0.05
 }
 
@@ -83,8 +83,8 @@ def simulation_variable_household_size(file_dir, population_size, params=NOMINAL
     #     with open('../results/experiment_2/pareto_analysis_{}/results_prevalence={}_pool-size={}.data'.format(num_iters, p, n), 'wb') as f:
     #         np.savetxt(f, results)
 
-    print('Process {} is done...'.format(os.getpid()))
-    sys.stdout.flush()
+    # print('Process {} is done...'.format(os.getpid()))
+    # sys.stdout.flush()
     return 
 
 
@@ -96,7 +96,7 @@ def run_simulations_for_sensitivity_analysis(num_iters=2000):
 
     configs = {
     'prevalence' :[0.001, 0.005, 0.05, 0.1],
-    'SAR' : [0.039, 0.154, 0.222, 0.446],
+    'SAR' : [0.005, 0.140, 0.193, 0.446],
     'pool size': [3, 12, 24],
     'FNR': [0.025, 0.1],
     'household dist': houshold_dists
@@ -201,7 +201,7 @@ def run_simulations_for_pareto_fontier(num_iters=2000):
             # avgs = np.mean(results, axis=0)
             # print('indep fnr = {}, corr fnr = {}, indep eff = {}, corr eff = {}'.format(avgs[0], avgs[1], avgs[2], avgs[3]))
 
-    print("Simulation for pareto analysis is done.")
+    # print("Simulation for pareto analysis is done.")
 
     return
 
