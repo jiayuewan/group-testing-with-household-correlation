@@ -119,16 +119,26 @@ def plot_hist_exp_2(results, param, val=None):
     eff_correlated = results[:, 3]
     # print Sn (naive), Sn (correlated), Eff (naive), Eff (correlated)
     num_iters = results.shape[0]
+    pool_size = 6.
 
     f = open(f"../results/experiment_2/nominal_scenario_results_{num_iters}.txt", "w")
     f.write(f"sensitivity: {1 - np.mean(fnr_indep):.1%} (naive), {1 - np.mean(fnr_correlated):.1%} (correlated);\
         efficiency: {np.mean(eff_indep):.2f} (naive), {np.mean(eff_correlated):.2f} (correlated)\n")
     f.write(f"standard error: {np.std(fnr_indep)/np.sqrt(num_iters)}, {np.std(fnr_correlated)/np.sqrt(num_iters)}, \
         {np.std(eff_indep)/np.sqrt(num_iters)}, {np.std(eff_correlated)/np.sqrt(num_iters)}\n")
-    # print("sensitivity and efficiency:", 1 - np.mean(fnr_indep), 1 - np.mean(fnr_correlated), np.mean(eff_indep), np.mean(eff_correlated))
-    # print("standard error: ", np.std(fnr_indep)/np.sqrt(num_iters), np.std(fnr_correlated)/np.sqrt(num_iters), np.std(eff_indep)/np.sqrt(num_iters), np.std(eff_correlated)/np.sqrt(num_iters))
     f.write(f"improvement: {(1 - np.mean(fnr_correlated)) / (1 - np.mean(fnr_indep))-1:.2%} (sensitivity); \
         {np.mean(eff_correlated) / np.mean(eff_indep)-1:.2%} (efficiency)\n")
+
+    frac_sample_indiv_test_naive = 1 / np.mean(eff_indep) - 1 / pool_size
+    frac_sample_indiv_test_correlated = 1 / np.mean(eff_correlated) - 1 / pool_size
+    frac_positive_sample_indiv_test_naive = 0.01 * (1 - np.mean(fnr_indep)) / 0.95
+    frac_positive_sample_indiv_test_correlated = 0.01 * (1 - np.mean(fnr_correlated)) / 0.95
+    frac_negative_sample_indiv_test_naive = frac_sample_indiv_test_naive - frac_positive_sample_indiv_test_naive
+    frac_negative_sample_indiv_test_correlated = frac_sample_indiv_test_correlated - frac_positive_sample_indiv_test_correlated
+    f.write(f"fraction of samples tested individually: {frac_sample_indiv_test_naive:.2%} (naive), {frac_sample_indiv_test_correlated:.2%} (correlated)\n")
+    f.write(f"fraction of positive samples tested individually: {frac_positive_sample_indiv_test_naive:.2%} (naive), {frac_positive_sample_indiv_test_correlated:.2%} (correlated)\n")
+    f.write(f"fraction of negative samples tested individually: {frac_negative_sample_indiv_test_naive:.2%} (naive), {frac_negative_sample_indiv_test_correlated:.2%} (correlated)\n")
+    f.write(f"implied FPR: {frac_negative_sample_indiv_test_naive * 0.0001} (naive), {frac_negative_sample_indiv_test_correlated * 0.0001} (correlated)\n")
     f.close()
 
     ax1 = plt.subplot(111)

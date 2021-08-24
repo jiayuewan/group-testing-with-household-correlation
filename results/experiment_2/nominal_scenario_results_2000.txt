@@ -1,3 +1,7 @@
 sensitivity: 81.9% (naive), 86.0% (correlated);        efficiency: 4.67 (naive), 4.83 (correlated)
 standard error: 0.0007933385388163583, 0.0007401368191094795,         0.0026618363010444367, 0.002267474181988306
 improvement: 5.02% (sensitivity);         3.51% (efficiency)
+fraction of samples tested individually: 4.75% (naive), 4.03% (correlated)
+fraction of positive samples tested individually: 0.86% (naive), 0.91% (correlated)
+fraction of negative samples tested individually: 3.89% (naive), 3.12% (correlated)
+implied FPR: 3.891068041509885e-06 (naive), 3.120686510362073e-06 (correlated)
