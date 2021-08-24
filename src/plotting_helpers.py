@@ -342,7 +342,7 @@ def generate_heatmap_plots():
     fig.colorbar(heatmap, ax=ax0, orientation="horizontal", label="(%)")
 
     textcolors = ["k", "w"]
-    threshold = 0.056 * 100
+    threshold = 0.049 * 100
     for i, prev in enumerate(table_sn.index):
         for j, pool_size in enumerate(table_sn.columns):
             text = ax0.text(j+0.5, i+0.5, "{:.1f}".format(table_sn.iloc[i,j]),
@@ -361,7 +361,7 @@ def generate_heatmap_plots():
     fig.colorbar(heatmap, ax=ax1, orientation="horizontal")
 
     textcolors = ["k", "w"]
-    threshold = 0.8
+    threshold = 0.675
     for i, prev in enumerate(table_eff.index):
         for j, pool_size in enumerate(table_eff.columns):
             text = ax1.text(j+0.5, i+0.5, "{:.2f}".format(table_eff.iloc[i,j]).replace("0.", "."), \
@@ -453,3 +453,4 @@ if __name__ == '__main__':
 
     # Table 8 results
     generate_test_consumption_results()
+    
