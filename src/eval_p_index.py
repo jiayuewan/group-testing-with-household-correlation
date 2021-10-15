@@ -50,7 +50,7 @@ def match_prevalence(p_index, target_prevalence, household_dist, SAR):
     return frac_tot_infected - target_prevalence
 
 
-# deprecated, modified from Massey's groupt testing code
+# deprecated, modified from Massey's group testing code
 def eval_p_index(match_prevalence, target_prevalence, household_dist, SAR=0.3741):
     return fsolve(match_prevalence, 0.005, args=(target_prevalence, household_dist, SAR))
 

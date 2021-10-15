@@ -1,6 +1,10 @@
 import numpy as np
+from functools import partial
 from viral_load_distribution import sample_log10_viral_loads
 import matplotlib.pyplot as plt 
+# from scipy.optimize import fsolve
+from multiprocessing import Pool, cpu_count
+import csv
 
 PCR_PARAMS = {'V_sample': 1, 'c_1': 1/10, 'gamma': 1/2, 'c_2': 1}
 PCR_LOD = 100
@@ -91,12 +95,36 @@ def eval_FNR(mu, params=PCR_PARAMS, n_iters=1000):
     return 1 - detected / n_iters
 
 
+
 # typically takes ~ 1 minute to run
-def calculate_FNR(LoD, sample_size=1000000):
+def calculate_FNR(LoD, sample_size=10000000):
     log10_mu_list = sample_log10_viral_loads(sample_size)
     mu_list = (10 ** np.array(log10_mu_list)).astype(int)
     FNs = sample_size - sum(pooled_PCR_test(mu_list, individual=True, LoD=LoD))
     return FNs / sample_size
+
+
+def generate_LoD_to_FNR_table(min_LoD, max_LoD):
+    LoDs = np.arange(min_LoD, max_LoD + 1)
+    num_processes = cpu_count()
+    print(LoDs, num_processes)
+    with Pool(num_processes) as p:
+        FNRs = p.map(calculate_FNR, LoDs)
+    
+    results = zip(LoDs, FNRs)
+    with open('../results/PCR_tests/LoD_to_FNR.csv','w') as out:
+        csv_out=csv.writer(out)
+        csv_out.writerow(['LoD','FNR'])
+        for row in results:
+            csv_out.writerow(row)
+    return
+
+# def match_LoD_to_FNR(LoD, target_FNR):
+#     return calculate_FNR(LoD) - target_FNR
+
+
+# def find_LoD_for_target_FNR(match_FNR_func, target_FNR):
+#     return fsolve(match_FNR_func, 100, args=(target_FNR))
 
 
 def calculate_FNR_for_fixed_VL(LoD, mu, sample_size=1000000):
@@ -123,22 +151,50 @@ def generate_indiv_test_sensitivity_curve():
     plt.close()
 
 
-def compute_bound_in_theorem_2(num_positives=2, pool_size=2, n_iters=100000):
-    count_Y_1_SD_0 = 0
-    count_Y_1_SD_1 = 0
+def compute_bound_in_theorem_2(pool_size=2, LoD=174, n_iters=100000):
+    count_Y_1_SD_0_given_S_n = 0
+    count_Y_1_SD_1_given_S_1 = 0
 
     for _ in range(n_iters):
-        viral_loads = np.array([10 ** x for x in sample_log10_viral_loads(n_samples=num_positives)] + [0] * (pool_size - num_positives)).astype(int)
-        S_D = sum(pooled_PCR_test(viral_loads, individual=True))
-        Y = pooled_PCR_test(viral_loads, individual=False)
+        viral_loads = np.array([10 ** x for x in sample_log10_viral_loads(n_samples=pool_size)] + [0] * (pool_size - pool_size)).astype(int)
+        S_D = sum(pooled_PCR_test(viral_loads, individual=True, LoD=LoD))
+        Y = pooled_PCR_test(viral_loads, individual=False, LoD=LoD)
         if Y == 1 and S_D == 0:
-            count_Y_1_SD_0 += 1
+            count_Y_1_SD_0_given_S_n += 1
 
-        elif Y == 1 and S_D > 0:
-            count_Y_1_SD_1 += 1
 
-    return (count_Y_1_SD_0, count_Y_1_SD_1, count_Y_1_SD_0/count_Y_1_SD_1)
+    for _ in range(n_iters):
+        viral_loads = np.array([10 ** x for x in sample_log10_viral_loads(n_samples=1)] + [0] * (pool_size - 1)).astype(int)
+        S_D = sum(pooled_PCR_test(viral_loads, individual=True, LoD=LoD))
+        Y = pooled_PCR_test(viral_loads, individual=False, LoD=LoD)
+        if Y == 1 and S_D > 0:
+            count_Y_1_SD_1_given_S_1 += 1
 
+    return (pool_size, LoD, n_iters, count_Y_1_SD_0_given_S_n, count_Y_1_SD_1_given_S_1, count_Y_1_SD_0_given_S_n/count_Y_1_SD_1_given_S_1)
+
+
+def compute_bounds_in_theorem_2(n_iters=100000):
+    result_list = []
+    def log_result(result):
+        result_list.append(result)
+
+    p = Pool()
+    n_iters = n_iters
+    for n in [2, 4, 6, 12]:
+        for LoD in [108, 174, 342, 1240]:
+            print(f"computing bound for n = {n} and LoD = {LoD}...") # to multiply # iterations by 100
+            p.apply_async(compute_bound_in_theorem_2, args = (n, LoD, n_iters, ), callback = log_result)
+
+    p.close()
+    p.join()
+
+    result_list = sorted(result_list, key=lambda x: (x[0], x[1]))
+    with open('../results/PCR_tests/bounds_in_theorem_2.csv','w') as out:
+        csv_out=csv.writer(out)
+        csv_out.writerow(['pool size', 'LoD', 'niters', 'numerator', 'denominator', 'bound'])
+        for row in result_list:
+            csv_out.writerow(row)
+    return
 
 if __name__ == '__main__':
     # print(calculate_FNR_for_fixed_VL(174, 3.45))
@@ -146,12 +202,15 @@ if __name__ == '__main__':
     # print(pooled_PCR_test(np.array([100, 100, 1000])))
     # print(compute_bound_in_theorem_2(1, 2))
     # for n in [2, 6, 12]:
-    #     print(n, compute_bound_in_theorem_2(n, n))
-    #     ratios = np.zeros(n - 1)
-    #
-    #     for k in range(1, n):
-    #         ratios[k-1] = compute_bound_in_theorem_2(k, n)[2]
-    #
-    #     print("for pool size = {0}, the ratios for k from 1 to {0} are {1}".format(n, ratios))
-    plt.rcParams["font.family"] = 'serif'
-    generate_indiv_test_sensitivity_curve()
+    #     #print(n, compute_bound_in_theorem_2(n, n))
+    #     print(compute_bound_in_theorem_2(n, n)[0] / compute_bound_in_theorem_2(1, n)[0])
+        #ratios = np.zeros(n - 1)
+    
+        #for k in range(1, n):
+        #    ratios[k-1] = compute_bound_in_theorem_2(k, n)[2]
+    
+        #print("for pool size = {0}, the ratios for k from 1 to {0} are {1}".format(n, ratios))
+    #plt.rcParams["font.family"] = 'serif'
+    # generate_indiv_test_sensitivity_curve()
+    # generate_LoD_to_FNR_table(10, 1500)
+    compute_bounds_in_theorem_2(n_iters=10000000)
