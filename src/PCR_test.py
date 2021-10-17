@@ -146,7 +146,7 @@ def generate_indiv_test_sensitivity_curve():
     plt.plot(mus, Sns)
     plt.xlabel(r"$\log_{10} VL$ (copies/mL)")
     plt.ylabel("sensitivity")
-    plt.title(r"Individual test sensitvity vs. $\log_{10}$ viral load under LoD$=174$")
+    plt.title(r"Individual test sensitvity vs. $\log_{10}$ viral load under $\tau=174$")
     plt.savefig('../figs/individual_test_sensitivity.pdf')
     plt.close()
 
@@ -211,6 +211,6 @@ if __name__ == '__main__':
     
         #print("for pool size = {0}, the ratios for k from 1 to {0} are {1}".format(n, ratios))
     #plt.rcParams["font.family"] = 'serif'
-    # generate_indiv_test_sensitivity_curve()
+    generate_indiv_test_sensitivity_curve()
     # generate_LoD_to_FNR_table(10, 1500)
-    compute_bounds_in_theorem_2(n_iters=10000000)
+    # compute_bounds_in_theorem_2(n_iters=10000000)
