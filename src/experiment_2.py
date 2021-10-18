@@ -27,10 +27,10 @@ def simulation_variable_household_size(file_dir, population_size, params=NOMINAL
     SAR = params['SAR']
     FNR = params['FNR']
 
-    if not FNR in [0.025, 0.05, 0.1]:
+    if not FNR in [0.025, 0.05, 0.1, 0.2]:
         raise ValueError("supported FNR values do not include {}".format(FNR))
     else:
-        LoD = 108 if FNR == 0.025 else 174 if FNR == 0.05 else 345
+        LoD = 108 if FNR == 0.025 else 174 if FNR == 0.05 else 342 if FNR == 0.1 else 1240
 
     print(f"Process {os.getpid()}: Running simulations for param config: {params} with {num_iters} iterations...")
     sys.stdout.flush()
@@ -98,7 +98,7 @@ def run_simulations_for_sensitivity_analysis(num_iters=2000):
     'prevalence' :[0.001, 0.005, 0.05, 0.1],
     'SAR' : [0.005, 0.140, 0.193, 0.446],
     'pool size': [3, 12, 24],
-    'FNR': [0.025, 0.1],
+    'FNR': [0.025, 0.1, 0.2],
     'household dist': houshold_dists
     }
 
@@ -212,5 +212,3 @@ if __name__ == '__main__':
     run_simulations_for_sensitivity_analysis(num_iters=num_iters)
     run_simulations_for_pareto_fontier(num_iters=num_iters)
 
-    # for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
-    #     generate_sensitivity_plots(param)

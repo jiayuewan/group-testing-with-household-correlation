@@ -152,15 +152,16 @@ def generate_indiv_test_sensitivity_curve():
 
 
 def compute_bound_in_theorem_2(pool_size=2, LoD=174, n_iters=100000):
-    count_Y_1_SD_0_given_S_n = 0
+    count_Y_1_SD_0_given_S = np.zeros(pool_size)
     count_Y_1_SD_1_given_S_1 = 0
 
-    for _ in range(n_iters):
-        viral_loads = np.array([10 ** x for x in sample_log10_viral_loads(n_samples=pool_size)] + [0] * (pool_size - pool_size)).astype(int)
-        S_D = sum(pooled_PCR_test(viral_loads, individual=True, LoD=LoD))
-        Y = pooled_PCR_test(viral_loads, individual=False, LoD=LoD)
-        if Y == 1 and S_D == 0:
-            count_Y_1_SD_0_given_S_n += 1
+    for i in range(pool_size):
+        for _ in range(n_iters):
+            viral_loads = np.array([10 ** x for x in sample_log10_viral_loads(n_samples=i + 1)] + [0] * (pool_size - i - 1)).astype(int)
+            S_D = sum(pooled_PCR_test(viral_loads, individual=True, LoD=LoD))
+            Y = pooled_PCR_test(viral_loads, individual=False, LoD=LoD)
+            if Y == 1 and S_D == 0:
+                count_Y_1_SD_0_given_S[i] += 1
 
 
     for _ in range(n_iters):
@@ -170,7 +171,7 @@ def compute_bound_in_theorem_2(pool_size=2, LoD=174, n_iters=100000):
         if Y == 1 and S_D > 0:
             count_Y_1_SD_1_given_S_1 += 1
 
-    return (pool_size, LoD, n_iters, count_Y_1_SD_0_given_S_n, count_Y_1_SD_1_given_S_1, count_Y_1_SD_0_given_S_n/count_Y_1_SD_1_given_S_1)
+    return (pool_size, LoD, n_iters, count_Y_1_SD_0_given_S, count_Y_1_SD_1_given_S_1, count_Y_1_SD_0_given_S/count_Y_1_SD_1_given_S_1)
 
 
 def compute_bounds_in_theorem_2(n_iters=100000):
@@ -189,7 +190,7 @@ def compute_bounds_in_theorem_2(n_iters=100000):
     p.join()
 
     result_list = sorted(result_list, key=lambda x: (x[0], x[1]))
-    with open('../results/PCR_tests/bounds_in_theorem_2.csv','w') as out:
+    with open('../results/PCR_tests/bounds_in_theorem_2_updated.csv','w') as out:
         csv_out=csv.writer(out)
         csv_out.writerow(['pool size', 'LoD', 'niters', 'numerator', 'denominator', 'bound'])
         for row in result_list:
@@ -210,7 +211,7 @@ if __name__ == '__main__':
         #    ratios[k-1] = compute_bound_in_theorem_2(k, n)[2]
     
         #print("for pool size = {0}, the ratios for k from 1 to {0} are {1}".format(n, ratios))
-    #plt.rcParams["font.family"] = 'serif'
-    generate_indiv_test_sensitivity_curve()
+    # plt.rcParams["font.family"] = 'serif'
+    # generate_indiv_test_sensitivity_curve()
     # generate_LoD_to_FNR_table(10, 1500)
-    # compute_bounds_in_theorem_2(n_iters=10000000)
+    compute_bounds_in_theorem_2(n_iters=10000000)

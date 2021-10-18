@@ -236,7 +236,7 @@ def generate_sensitivity_plots(param):
 
     ax.set_xticklabels(df[param])
     ax.set_ylabel('sensitivity')
-    ax.set_ylim(0.7) 
+    ax.set_ylim(0.6) 
     ax2.set_ylabel('efficiency')
     ax2.set_ylim(1) if param in ['prevalence', 'pool size'] else ax2.set_ylim(4.5)
     ax.set_xlabel(param) if param != 'FNR' else ax.set_xlabel('individual testing average FNR')
