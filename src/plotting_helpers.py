@@ -483,7 +483,7 @@ def generate_bound_in_theorem_2_results(n_iters=1000000, n_resamples=1000):
 
     df = df[['pool size', 'LoD', 'FNR', 'num_mean', 'denom_mean', 'delta_mean', 'delta_lb', 'delta_ub']]
     df['num_mean'] = df['num_mean'].apply(lambda x: '{:.2E}'.format(x))
-    df['denom_mean'] = df['denom_mean'].apply(lambda x: '{:.2f}'.format(x))
+    df['denom_mean'] = df['denom_mean'].apply(lambda x: '{:.3f}'.format(x))
     df['delta_mean'] = df['delta_mean'].apply(lambda x: '{:.2E}'.format(x))
     df['delta_lb'] = df['delta_lb'].apply(lambda x: '{:.2E}'.format(x))
     df['delta_ub'] = df['delta_ub'].apply(lambda x: '{:.2E}'.format(x))
