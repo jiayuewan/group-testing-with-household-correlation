@@ -7,8 +7,12 @@ import matplotlib.pyplot as plt
 # from scipy.optimize import fsolve
 from multiprocessing import Pool, cpu_count
 import csv
-from scipy.special import gammaln
-from binom_cdf import compute_binomial_logcdf
+import pandas as pd
+import sys
+import os
+# from scipy.special import 
+# gammaln
+# from binom_cdf import compute_binomial_logcdf
 
 PCR_PARAMS = {'V_sample': 1, 'c_1': 1/10, 'xi': 1/2, 'c_2': 1}  # c_1 = V_subsample / V_sample
 PCR_LOD = 100
@@ -237,21 +241,35 @@ def compute_bound_in_theorem_2_alternative(pool_size=2, LoD=174, params=PCR_PARA
     xi = params['xi']
     c_2 = params['c_2']
     
-    prob_Y_1_given_indiv_pos = np.zeros(n_iters)
-    prob_Y_1_given_indiv_neg = np.zeros(n_iters)
+    prob_Y_1_given_indiv_pos = np.zeros((n_iters, 1))
+    prob_Y_1_given_indiv_neg = np.zeros((n_iters, 1))
 
     for i in range(n_iters):
         # P(Y = 1 | S_D = S = 1)
+        if i % 1000 == 0:
+            print(f"pool size = {pool_size}, LoD = {LoD}, progress = {i} / {n_iters} iterations ...")
+            sys.stdout.flush()
         V_pos = generate_indiv_positive_samples(size=1, LoD=LoD, params=PCR_PARAMS)[0]
         # prob = 1 - st.binom.cdf(LoD - 1, V_sample * V_pos, c_1 / pool_size * xi * c_2)
         prob = st.binom.cdf(V_sample * V_pos - LoD, V_sample * V_pos, 1 - c_1 / pool_size * xi * c_2)
-        prob_Y_1_given_indiv_pos[i] = 1 if math.isnan(prob) else prob
+        prob_Y_1_given_indiv_pos[i, 0] = 1 if math.isnan(prob) else prob
 
         # P(Y = 1 | S_D = 0, S = n)
         V_neg = sum(generate_indiv_negative_samples(size=pool_size, LoD=LoD, params=PCR_PARAMS))
         # prob = 1 - st.binom.cdf(LoD - 1, V_sample * V_neg, c_1 / pool_size * xi * c_2)
         prob = st.binom.cdf(V_sample * V_neg - LoD, V_sample * V_neg, 1 - c_1 / pool_size * xi * c_2)
-        prob_Y_1_given_indiv_neg[i] = 1 if math.isnan(prob) else prob
+        prob_Y_1_given_indiv_neg[i, 0] = 1 if math.isnan(prob) else prob
+    
+    #print(prob_Y_1_given_indiv_pos, prob_Y_1_given_indiv_neg)
+    output_dir = f"../results/PCR_tests/bound_analysis_{n_iters}/"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    filename = f"results_pool_size={pool_size}_LoD={LoD}.data"
+    file_dir = os.path.join(output_dir, filename)
+    results = np.concatenate((prob_Y_1_given_indiv_pos, prob_Y_1_given_indiv_neg), axis=1)
+    with open(file_dir, 'wb') as f:
+        np.savetxt(f, results)
 
     return pool_size, LoD, n_iters, np.mean(prob_Y_1_given_indiv_pos), np.std(prob_Y_1_given_indiv_pos), np.mean(prob_Y_1_given_indiv_neg), np.std(prob_Y_1_given_indiv_neg)
 
@@ -286,11 +304,14 @@ def compute_bounds_in_theorem_2_alternative(n_iters=100000, params=PCR_PARAMS):
     def log_result(result):
         result_list.append(result)
     
+
+
     p = Pool()
     n_iters = n_iters
     for n in [2, 4, 6, 12]:
         for LoD in [108, 174, 342, 1240]:
             print(f"computing bound for n = {n} and LoD = {LoD}...") 
+            # sys.stdout.flush()
             p.apply_async(compute_bound_in_theorem_2_alternative, args = (n, LoD, params, n_iters, ), callback = log_result)
 
     p.close()
@@ -324,5 +345,5 @@ if __name__ == '__main__':
     # generate_indiv_test_sensitivity_curve()
     # print(generate_indiv_negative_samples(10, LoD=100))
     # compute_bounds_in_theorem_2(n_iters=1000)
-    # print(compute_bounds_in_theorem_2_new(pool_size = 12, n_iters=100, LoD=174))
+    # print(compute_bound_in_theorem_2_alternative(pool_size = 4, n_iters=100, LoD=1240))
     compute_bounds_in_theorem_2_alternative(n_iters=1000000)

@@ -3,10 +3,11 @@ import os
 import numpy as np
 import pandas as pd
 from matplotlib import cm
-import matplotlib
+# import matplotlib
 from adjustText import adjust_text
 import re
 import matplotlib.patheffects as pe
+import scipy.stats as st
 
 
 # deprecated
@@ -431,26 +432,89 @@ def generate_test_consumption_results():
     return
 
 
+def generate_bound_in_theorem_2_results(n_iters=1000000, n_resamples=1000):
+    filename = f'../results/PCR_tests/bounds_in_theorem_2_alternative_{n_iters}.csv'
+    dir = f'../results/PCR_tests/bound_analysis_{n_iters}'
+
+    df = pd.read_csv(filename)
+
+    LoD_to_FNR = {108: 0.025, 174: 0.05, 342: 0.1, 1240: 0.2}
+    df['FNR'] = df['LoD'].map(LoD_to_FNR)
+
+    # confidence interval for denom
+    df['denom_se'] = df['denom_std'] / np.sqrt(df['niters'])
+    q_denom = 0.9999
+    z_denom = st.norm.ppf((q_denom + 1) / 2)
+    df['denom_lb'] = df['denom_mean'] - z_denom * df['denom_se']
+    df['denom_ub'] = df['denom_mean'] + z_denom * df['denom_se']
+
+    # confidence interval for num
+    q_num = 0.95 / q_denom
+    df['num_lb'] = 0.0
+    df['num_ub'] = 0.0
+    for filename in os.listdir(dir):
+        if filename == ".DS_Store":
+            continue
+
+        parts = re.split('=|[.](?!\d)|_', filename)
+        pool_size = int(parts[3])
+        LoD = int(parts[5])
+        print(f"Bootstrapping for pool size = {pool_size} and LoD = {LoD}...")
+        filedir = os.path.join(dir, filename)
+        with open(filedir) as f:
+            results = np.loadtxt(f)
+
+        data = results[:, 1].flatten()
+        size = len(data)
+        means = np.zeros(n_resamples)
+        for i in range(n_resamples):
+            means[i] = np.random.choice(data, replace=True, size=size).mean()
+        
+        num_lb = np.percentile(means, (1 - q_num)/2 * 100)
+        num_ub = np.percentile(means, (1 + q_num)/2 * 100)
+        print(num_lb, num_ub)
+        df.loc[(df['pool size'] == pool_size) & (df['LoD'] == LoD), 'num_lb'] = num_lb
+        df.loc[(df['pool size'] == pool_size) & (df['LoD'] == LoD), 'num_ub'] = num_ub
+    
+    
+    df['delta_mean'] = df['num_mean'] / df['denom_mean'] * df['FNR'] / (1 - df['FNR'])
+    df['delta_lb'] = df['num_lb'] / df['denom_ub'] * df['FNR'] / (1 - df['FNR'])
+    df['delta_ub'] = df['num_ub'] / df['denom_lb'] * df['FNR'] / (1 - df['FNR'])
+
+    df = df[['pool size', 'LoD', 'FNR', 'num_mean', 'denom_mean', 'delta_mean', 'delta_lb', 'delta_ub']]
+    df['num_mean'] = df['num_mean'].apply(lambda x: '{:.2E}'.format(x))
+    df['denom_mean'] = df['denom_mean'].apply(lambda x: '{:.2f}'.format(x))
+    df['delta_mean'] = df['delta_mean'].apply(lambda x: '{:.2E}'.format(x))
+    df['delta_lb'] = df['delta_lb'].apply(lambda x: '{:.2E}'.format(x))
+    df['delta_ub'] = df['delta_ub'].apply(lambda x: '{:.2E}'.format(x))
+    df.to_csv(f'../results/PCR_tests/bounds_in_theorem_2_alternative_{n_iters}_with_CI.csv', header=True, index=False)
+
+    return
+
+
+
 if __name__ == '__main__':
     plt.rcParams["font.family"] = 'serif'
     
-    filedir = "../results/experiment_2/sensitivity_analysis_2000/results_prevalence=0.01_SAR=0.166_pool size=6_FNR=0.05_household dist=US.data"
-    with open(filedir) as f:
-        results = np.loadtxt(f)
+    # filedir = "../results/experiment_2/sensitivity_analysis_2000/results_prevalence=0.01_SAR=0.166_pool size=6_FNR=0.05_household dist=US.data"
+    # with open(filedir) as f:
+    #     results = np.loadtxt(f)
     
-    # Table 7 results
-    plot_hist_exp_2(results, 'nominal')
+    # # Table 7 results
+    # plot_hist_exp_2(results, 'nominal')
 
-    # Figure 2 results
-    for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
-        generate_sensitivity_plots(param)
+    # # Figure 2 results
+    # for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
+    #     generate_sensitivity_plots(param)
     
-    # Figure 3 results
-    generate_pareto_fontier_plots()
+    # # Figure 3 results
+    # generate_pareto_fontier_plots()
     
-    # Figure 4 results
-    generate_heatmap_plots()
+    # # Figure 4 results
+    # generate_heatmap_plots()
 
-    # Table 8 results
-    generate_test_consumption_results()
+    # # Table 8 results
+    # generate_test_consumption_results()
+
+    generate_bound_in_theorem_2_results()
     
