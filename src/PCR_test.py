@@ -172,16 +172,32 @@ def calculate_FNR_for_fixed_VL(LoD, mu, sample_size=1000000):
     # mu = 3.65 -> 0.02% (VL = 4467)
 
 
+def calculate_FNR_for_fixed_VL_alternative(LoD, mu, params=PCR_PARAMS):
+    V_sample = params['V_sample']
+    c_1 = params['c_1']
+    xi = params['xi']
+    c_2 = params['c_2']
+    mu = int(10 ** mu)
+    fnr = st.binom.cdf(LoD - 1, V_sample * mu, c_1 * xi * c_2)
+    return fnr
+    # LoD = 174
+    # mu = 3.5 -> 89.7% (VL = 3162)
+    # mu = 3.55 -> 38.5%
+    # mu = 3.594 -> 4.6%
+    # mu = 3.65 -> 0.02% (VL = 4467)
+
 def generate_indiv_test_sensitivity_curve():
     mus = np.linspace(3, 4, 100)
-    Sns = [1 - calculate_FNR_for_fixed_VL(174, mu) for mu in mus]
-
+    Sns = [1 - calculate_FNR_for_fixed_VL_alternative(174, mu) for mu in mus]
     #plt.figure(figsize=(6,4))
-    plt.plot(mus, Sns)
-    plt.xlabel(r"$\log_{10} VL$ (copies/mL)")
-    plt.ylabel("sensitivity")
-    plt.title(r"Individual test sensitvity vs. $\log_{10}$ viral load under $\tau=174$")
-    plt.savefig('../figs/individual_test_sensitivity.pdf')
+    plt.plot(10**mus, Sns)
+    plt.xscale('log')
+    plt.xticks(10**np.linspace(3, 4, 6), [r'$10^{{{0}}}$'.format(x) for x in np.linspace(3,4,6)])
+    plt.minorticks_off()
+    plt.xlabel(r"viral load $v$ (copies/mL)")
+    plt.ylabel(r"PCR test sensitivity $p(v)$")
+    plt.title(r"PCR test sensitvity $p(v)$ under $\tau=174$")
+    plt.savefig('../figs/PCR_test_sensitivity.pdf')
     plt.close()
 
 
@@ -346,4 +362,5 @@ if __name__ == '__main__':
     # print(generate_indiv_negative_samples(10, LoD=100))
     # compute_bounds_in_theorem_2(n_iters=1000)
     # print(compute_bound_in_theorem_2_alternative(pool_size = 4, n_iters=100, LoD=1240))
-    compute_bounds_in_theorem_2_alternative(n_iters=1000000)
+    # compute_bounds_in_theorem_2_alternative(n_iters=1000000)
+    generate_indiv_test_sensitivity_curve()
