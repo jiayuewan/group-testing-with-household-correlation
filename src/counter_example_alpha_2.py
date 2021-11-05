@@ -4,7 +4,7 @@ import matplotlib.cm
 cmap = matplotlib.cm.get_cmap().copy()
 cmap.set_bad('white',np.nan)
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
+# import matplotlib.patches as mpatches
 
 
 theta1s = np.linspace(0.01, 1, 100)
@@ -35,8 +35,8 @@ def compute_cp_beta(alpha, theta1, theta2):
 
 
 def compute_cp_eta(alpha, theta1, theta2, np_beta, n=2):
-    num = n * (2 / 3 * theta1 + 1 / 3 * theta2)
-    denom = 0 * theta1 * theta2 + 2 / 3 * theta2**2 + 2 / 3 * theta1
+    denom = n * alpha * (1 - np_beta)
+    num = n * alpha * (theta1 + 1 / 2 * theta2)
     return num / denom
 
 
@@ -83,7 +83,6 @@ def plot_diff_efficiency():
     ax.vlines(x=0.1, ymin=2, ymax=100, color='r', linestyle='-', linewidth=5)
 
     plt.savefig('../figs/counterexample_alpha_over_2.pdf', format='pdf', dpi=600, bbox_inches='tight')
-
 
 
 
