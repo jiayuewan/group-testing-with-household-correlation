@@ -240,7 +240,14 @@ def generate_sensitivity_plots(param):
     ax.set_ylim(0.6) 
     ax2.set_ylabel('efficiency')
     ax2.set_ylim(1) if param in ['prevalence', 'pool size'] else ax2.set_ylim(4.5)
-    ax.set_xlabel(param) if param != 'FNR' else ax.set_xlabel('individual testing average FNR')
+    
+    if param == 'FNR':
+        ax.set_xlabel('population-average individual test FNR')
+    elif param == 'household dist':
+        ax.set_xlabel('household size distribution')
+    else:
+        ax.set_xlabel(param)
+
     h, l = ax.get_legend_handles_labels()
     h2, l2 = ax2.get_legend_handles_labels()
     ax.legend(h + h2, l + l2, loc='lower left', bbox_to_anchor=(0, 1.02, 0.6, 1.02), ncol=2)
@@ -504,8 +511,8 @@ if __name__ == '__main__':
     # plot_hist_exp_2(results, 'nominal')
 
     # # Figure 2 results
-    # for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
-    #     generate_sensitivity_plots(param)
+    for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
+        generate_sensitivity_plots(param)
     
     # # Figure 3 results
     # generate_pareto_fontier_plots()
@@ -516,5 +523,6 @@ if __name__ == '__main__':
     # # Table 8 results
     # generate_test_consumption_results()
 
-    generate_bound_in_theorem_2_results()
+    # Table EC.3 results
+    # generate_bound_in_theorem_2_results()
     
