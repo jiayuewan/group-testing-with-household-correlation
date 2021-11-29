@@ -196,7 +196,7 @@ def generate_indiv_test_sensitivity_curve():
     plt.minorticks_off()
     plt.xlabel(r"viral load $v$ (copies/mL)")
     plt.ylabel(r"PCR test sensitivity $p(v)$")
-    plt.title(r"PCR test sensitvity $p(v)$ under $\tau=174$")
+    plt.title(r"PCR test sensitvity $p(v)$ under $\bar\beta=5\%$")
     plt.savefig('../figs/PCR_test_sensitivity.pdf')
     plt.close()
 
@@ -343,24 +343,10 @@ def compute_bounds_in_theorem_2_alternative(n_iters=100000, params=PCR_PARAMS):
 
 
 if __name__ == '__main__':
-    # print(calculate_FNR(140))
-    # print(calculate_FNR_for_fixed_VL(174, 3.45))
-    # print(pooled_PCR_test(np.array([0, 0, 0])))
-    # print(pooled_PCR_test(np.array([100, 100, 1000])))
-    # print(compute_bound_in_theorem_2(1, 2))
-    # for n in [2, 6, 12]:
-    #     #print(n, compute_bound_in_theorem_2(n, n))
-    #     print(compute_bound_in_theorem_2(n, n)[0] / compute_bound_in_theorem_2(1, n)[0])
-        #ratios = np.zeros(n - 1)
-    
-        #for k in range(1, n):
-        #    ratios[k-1] = compute_bound_in_theorem_2(k, n)[2]
-    
-        #print("for pool size = {0}, the ratios for k from 1 to {0} are {1}".format(n, ratios))
-    # plt.rcParams["font.family"] = 'serif'
-    # generate_indiv_test_sensitivity_curve()
-    # print(generate_indiv_negative_samples(10, LoD=100))
-    # compute_bounds_in_theorem_2(n_iters=1000)
-    # print(compute_bound_in_theorem_2_alternative(pool_size = 4, n_iters=100, LoD=1240))
-    # compute_bounds_in_theorem_2_alternative(n_iters=1000000)
+    plt.rcParams["font.family"] = 'serif'
+
+    # Figure 1
     generate_indiv_test_sensitivity_curve()
+
+    # Table EC.6
+    compute_bounds_in_theorem_2_alternative(n_iters=1000000)
