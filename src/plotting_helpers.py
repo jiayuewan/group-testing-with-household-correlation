@@ -439,7 +439,7 @@ def generate_test_consumption_results():
     return
 
 
-def generate_bound_in_theorem_2_results(n_iters=1000000, n_resamples=1000):
+def generate_bound_in_theorem_2_results(n_iters=1000000, n_resamples=10000):
     filename = f'../results/PCR_tests/bounds_in_theorem_2_alternative_{n_iters}.csv'
     dir = f'../results/PCR_tests/bound_analysis_{n_iters}'
 
@@ -494,7 +494,7 @@ def generate_bound_in_theorem_2_results(n_iters=1000000, n_resamples=1000):
     df['delta_mean'] = df['delta_mean'].apply(lambda x: '{:.2E}'.format(x))
     df['delta_lb'] = df['delta_lb'].apply(lambda x: '{:.2E}'.format(x))
     df['delta_ub'] = df['delta_ub'].apply(lambda x: '{:.2E}'.format(x))
-    df.to_csv(f'../results/PCR_tests/bounds_in_theorem_2_alternative_{n_iters}_with_CI.csv', header=True, index=False)
+    df.to_csv(f'../results/PCR_tests/bounds_in_theorem_2_alternative_{n_iters}_with_CI_from_{n_resamples}_resamples.csv', header=True, index=False)
 
     return
 
@@ -503,25 +503,25 @@ def generate_bound_in_theorem_2_results(n_iters=1000000, n_resamples=1000):
 if __name__ == '__main__':
     plt.rcParams["font.family"] = 'serif'
     
-    filedir = "../results/experiment_2/sensitivity_analysis_2000/results_prevalence=0.01_SAR=0.166_pool size=6_FNR=0.05_household dist=US.data"
-    with open(filedir) as f:
-        results = np.loadtxt(f)
+    # filedir = "../results/experiment_2/sensitivity_analysis_2000/results_prevalence=0.01_SAR=0.166_pool size=6_FNR=0.05_household dist=US.data"
+    # with open(filedir) as f:
+    #     results = np.loadtxt(f)
     
-    # Table 7 results
-    plot_hist_exp_2(results, 'nominal')
+    # # Table 7 results
+    # plot_hist_exp_2(results, 'nominal')
 
-    # Figure 2 results
-    for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
-        generate_sensitivity_plots(param)
+    # # Figure 2 results
+    # for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
+    #     generate_sensitivity_plots(param)
     
-    # Figure 3 results
-    generate_pareto_fontier_plots()
+    # # Figure 3 results
+    # generate_pareto_fontier_plots()
     
-    # Figure 4 results
-    generate_heatmap_plots()
+    # # Figure 4 results
+    # generate_heatmap_plots()
 
-    # Table 8 results
-    generate_test_consumption_results()
+    # # Table 8 results
+    # generate_test_consumption_results()
 
     # Table EC.3 results
     generate_bound_in_theorem_2_results()
