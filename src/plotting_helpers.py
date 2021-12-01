@@ -503,25 +503,25 @@ def generate_bound_in_theorem_2_results(n_iters=1000000, n_resamples=10000):
 if __name__ == '__main__':
     plt.rcParams["font.family"] = 'serif'
     
-    # filedir = "../results/experiment_2/sensitivity_analysis_2000/results_prevalence=0.01_SAR=0.166_pool size=6_FNR=0.05_household dist=US.data"
-    # with open(filedir) as f:
-    #     results = np.loadtxt(f)
+    filedir = "../results/experiment_2/sensitivity_analysis_2000/results_prevalence=0.01_SAR=0.166_pool size=6_FNR=0.05_household dist=US.data"
+    with open(filedir) as f:
+        results = np.loadtxt(f)
     
-    # # Table 7 results
-    # plot_hist_exp_2(results, 'nominal')
+    # Table 7 results
+    plot_hist_exp_2(results, 'nominal')
 
-    # # Figure 2 results
-    # for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
-    #     generate_sensitivity_plots(param)
+    # Figure 2 results
+    for param in ['prevalence', 'pool size', 'SAR', 'FNR', 'household dist']:
+        generate_sensitivity_plots(param)
     
-    # # Figure 3 results
-    # generate_pareto_fontier_plots()
+    # Figure 3 results
+    generate_pareto_fontier_plots()
     
-    # # Figure 4 results
-    # generate_heatmap_plots()
+    # Figure 4 results
+    generate_heatmap_plots()
 
-    # # Table 8 results
-    # generate_test_consumption_results()
+    # Table 8 results
+    generate_test_consumption_results()
 
     # Table EC.3 results
     generate_bound_in_theorem_2_results()
