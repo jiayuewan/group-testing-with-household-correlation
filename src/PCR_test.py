@@ -186,18 +186,19 @@ def calculate_FNR_for_fixed_VL_alternative(LoD, mu, params=PCR_PARAMS):
     # mu = 3.594 -> 4.6%
     # mu = 3.65 -> 0.02% (VL = 4467)
 
-def generate_indiv_test_sensitivity_curve():
-    mus = np.linspace(3, 4, 100)
-    Sns = [1 - calculate_FNR_for_fixed_VL_alternative(174, mu) for mu in mus]
+def generate_indiv_test_sensitivity_curve(detection_threshold=174, lb=3, ub=4):
+    mus = np.linspace(lb, ub, 100)
+    Sns = [1 - calculate_FNR_for_fixed_VL_alternative(detection_threshold, mu) for mu in mus]
     #plt.figure(figsize=(6,4))
     plt.plot(10**mus, Sns)
     plt.xscale('log')
-    plt.xticks(10**np.linspace(3, 4, 6), [r'$10^{{{0}}}$'.format(x) for x in np.linspace(3,4,6)])
+    plt.xticks(10**np.linspace(lb, ub, 6), [r'$10^{{{0}}}$'.format(x) for x in np.linspace(lb,ub,6)])
     plt.minorticks_off()
     plt.xlabel(r"viral load $v$ (copies/mL)")
     plt.ylabel(r"PCR test sensitivity $p(v)$")
-    plt.title(r"PCR test sensitvity $p(v)$ under $\bar\beta=5\%$")
-    plt.savefig('../figs/PCR_test_sensitivity.pdf')
+    # plt.title(r"PCR test sensitvity $p(v)$ under $\bar\beta=5\%$")
+    plt.title(r"PCR test sensitvity $p(v)$")
+    plt.savefig(f'../figs/PCR_test_sensitivity_{detection_threshold}.pdf')
     plt.close()
 
 
@@ -346,7 +347,7 @@ if __name__ == '__main__':
     plt.rcParams["font.family"] = 'serif'
 
     # Figure 1
-    generate_indiv_test_sensitivity_curve()
+    generate_indiv_test_sensitivity_curve(detection_threshold=1240, lb=4, ub=5)
 
     # Table EC.6
     compute_bounds_in_theorem_2_alternative(n_iters=1000000)
